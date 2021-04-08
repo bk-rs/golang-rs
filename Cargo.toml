@@ -1,5 +1,6 @@
 [workspace]
 members = [
     "golang-struct-tag",
+    "golang-type",
     "golang-type-name",
 ]
