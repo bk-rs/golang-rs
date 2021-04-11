@@ -1,0 +1,10 @@
+convention = { "`" ~ convention_pair ~ (" "+ ~ convention_pair)* ~ "`" }
+convention_pair = { json | other }
+
+json = { "json" ~ ":" ~ "\"" ~ json_name ~ ("," ~ json_option)* ~ "\"" }
+json_name = @{ ("\x21" | '\x23'..'\x2B' | '\x2D'..'\x39' | '\x3B'..'\x7E')* }
+json_option = @{ ('\x20'..'\x21' | '\x23'..'\x2B' | '\x2D'..'\x7E')* }
+
+other = { other_key ~ ":" ~ "\"" ~ other_value ~ "\"" }
+other_key = @{ ("\x21" | '\x23'..'\x39' | '\x3B'..'\x7E')+ }
+other_value = @{ ("\x21" | '\x23'..'\x7E')* }

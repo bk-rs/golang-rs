@@ -1,0 +1,12 @@
+A	`json:""`
+B	`json:"-"`
+C	`json:"-,"`
+D	`json:"d"`
+E	`json:",omitempty"`
+F	`json:",string"`
+G	`json:"g,omitempty"`
+H	`json:"h,string"`
+I	`json:"i,omitempty,string"`
+J	`json:"j,string,omitempty"`
+K	`json:"k,foo,bar"`
+L	`json:"l" xml:""`
