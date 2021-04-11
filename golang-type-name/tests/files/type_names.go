@@ -35,6 +35,9 @@ func main() {
 	var _ uintptr
 
 	//
+	var _ string
+
+	//
 	var _ time.Duration
 
 	//

@@ -16,5 +16,6 @@ rune
 uint
 int
 uintptr
+string
 time.Duration
 foo
