@@ -13,3 +13,4 @@ categories = []
 readme = "README.md"
 
 [dependencies]
+thiserror = { version = "1.0", default-features = false }
