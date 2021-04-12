@@ -3,4 +3,5 @@ members = [
     "golang-struct-tag",
     "golang-type",
     "golang-type-name",
+    "golang-type-name-test",
 ]
