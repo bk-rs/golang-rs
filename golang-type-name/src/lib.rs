@@ -79,17 +79,17 @@ impl FromStr for TypeName {
             })?;
 
         let _ = node_var_spec.named_child(0).ok_or_else(|| {
-            TypeNameParseError::TreeSitterParseFailed("Not found name".to_string())
+            TypeNameParseError::TreeSitterParseFailed("Not found var_spec name".to_string())
         })?;
-        let node_type = node_var_spec.named_child(1).ok_or_else(|| {
-            TypeNameParseError::TreeSitterParseFailed("Not found type".to_string())
+        let node_var_spec_type = node_var_spec.named_child(1).ok_or_else(|| {
+            TypeNameParseError::TreeSitterParseFailed("Not found var_spec type".to_string())
         })?;
 
-        match node_type.kind() {
-            "qualified_type" => Self::from_qualified_type_node(node_type, source),
-            "type_identifier" => Self::from_type_identifier_node(node_type, source),
+        match node_var_spec_type.kind() {
+            "qualified_type" => Self::from_qualified_type_node(node_var_spec_type, source),
+            "type_identifier" => Self::from_type_identifier_node(node_var_spec_type, source),
             _ => Err(TypeNameParseError::UnsupportedType(
-                node_type.kind().to_owned(),
+                node_var_spec_type.kind().to_owned(),
             )),
         }
     }
@@ -97,23 +97,25 @@ impl FromStr for TypeName {
 
 impl TypeName {
     pub fn from_qualified_type_node(node: Node, source: &[u8]) -> Result<Self, TypeNameParseError> {
-        let node_package = node.named_child(0).ok_or_else(|| {
-            TypeNameParseError::TreeSitterParseFailed("Not found qualified package".to_string())
+        let node_qualified_type_package = node.named_child(0).ok_or_else(|| {
+            TypeNameParseError::TreeSitterParseFailed(
+                "Not found qualified_type package".to_string(),
+            )
         })?;
-        let node_identifier = node.named_child(1).ok_or_else(|| {
-            TypeNameParseError::TreeSitterParseFailed("Not found qualified identifier".to_string())
+        let node_qualified_type_name = node.named_child(1).ok_or_else(|| {
+            TypeNameParseError::TreeSitterParseFailed("Not found qualified_type name".to_string())
         })?;
 
-        let package_name = node_package
+        let package_str = node_qualified_type_package
             .utf8_text(source)
             .map_err(TypeNameParseError::Utf8Error)?;
-        let identifier_name = node_identifier
+        let name_str = node_qualified_type_name
             .utf8_text(source)
             .map_err(TypeNameParseError::Utf8Error)?;
 
         Ok(Self::QualifiedIdent(
-            package_name.to_owned(),
-            identifier_name.to_owned(),
+            package_str.to_owned(),
+            name_str.to_owned(),
         ))
     }
 
