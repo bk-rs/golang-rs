@@ -1,5 +1,7 @@
 use std::str::{self, FromStr};
 
+use proc_macro2::TokenStream;
+use quote::{quote, ToTokens, TokenStreamExt as _};
 use tree_sitter::Node;
 
 #[derive(PartialEq, Eq, Debug, Clone)]
@@ -154,6 +156,34 @@ impl TypeName {
     }
 }
 
+impl ToTokens for TypeName {
+    fn to_tokens(&self, tokens: &mut TokenStream) {
+        match self {
+            Self::Bool => tokens.append_all(quote!(::core::primitive::bool)),
+            Self::Uint8 => tokens.append_all(quote!(::core::primitive::u8)),
+            Self::Uint16 => tokens.append_all(quote!(::core::primitive::u16)),
+            Self::Uint32 => tokens.append_all(quote!(::core::primitive::u32)),
+            Self::Uint64 => tokens.append_all(quote!(::core::primitive::u64)),
+            Self::Int8 => tokens.append_all(quote!(::core::primitive::i8)),
+            Self::Int16 => tokens.append_all(quote!(::core::primitive::i16)),
+            Self::Int32 => tokens.append_all(quote!(::core::primitive::i32)),
+            Self::Int64 => tokens.append_all(quote!(::core::primitive::i64)),
+            Self::Float32 => tokens.append_all(quote!(::core::primitive::f32)),
+            Self::Float64 => tokens.append_all(quote!(::core::primitive::f64)),
+            Self::Complex64 => tokens.append_all(quote!(::num_complex::Complex32)),
+            Self::Complex128 => tokens.append_all(quote!(::num_complex::Complex64)),
+            Self::Uint => tokens.append_all(quote!(::core::primitive::usize)),
+            Self::Int => tokens.append_all(quote!(::core::primitive::isize)),
+            Self::Uintptr => tokens.append_all(quote!(::core::primitive::usize)),
+            Self::String => tokens.append_all(quote!(::alloc::string::String)),
+            Self::QualifiedIdent(package_str, str) => {
+                tokens.append_all(quote!(::#package_str::#str))
+            }
+            Self::Identifier(str) => tokens.append_all(quote!(#str)),
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -161,7 +191,7 @@ mod tests {
     use std::{error, fs, path::PathBuf};
 
     #[test]
-    fn simple() -> Result<(), Box<dyn error::Error>> {
+    fn test_parse() -> Result<(), Box<dyn error::Error>> {
         let content = fs::read_to_string(PathBuf::new().join("tests/files/type_names.txt"))?;
         for (i, line) in content.lines().enumerate() {
             let mut split = line.split("\t");
