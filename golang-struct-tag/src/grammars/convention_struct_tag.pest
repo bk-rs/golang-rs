@@ -1,5 +1,5 @@
-convention = { "`" ~ convention_pair ~ (" "+ ~ convention_pair)* ~ "`" }
-convention_pair = { json | other }
+tag = { "`" ~ tag_pair ~ (" "+ ~ tag_pair)* ~ "`" }
+tag_pair = { json | other }
 
 json = { "json" ~ ":" ~ "\"" ~ json_name ~ ("," ~ json_option)* ~ "\"" }
 json_name = @{ ("\x21" | '\x23'..'\x2B' | '\x2D'..'\x39' | '\x3B'..'\x7E')* }

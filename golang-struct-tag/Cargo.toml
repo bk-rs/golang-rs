@@ -13,6 +13,9 @@ categories = []
 readme = "README.md"
 
 [dependencies]
+tree-sitter = { version = "0.17", default-features = false }
+tree-sitter-go = { version = "0.16", default-features = false } 
+
 pest = { version = "2.1", default-features = false }
 pest_derive = { version = "2.1", default-features = false }
 

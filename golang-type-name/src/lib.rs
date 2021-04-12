@@ -65,13 +65,13 @@ impl FromStr for TypeName {
         let source = code.as_bytes();
         let node_source_file = tree.root_node();
 
-        let node_type_declaration = node_source_file
+        let node_var_declaration = node_source_file
             .named_children(&mut tree_cursor)
             .find(|node| node.kind() == "var_declaration")
             .ok_or_else(|| {
                 TypeNameParseError::TreeSitterParseFailed("Not found var_declaration".to_string())
             })?;
-        let node_var_spec = node_type_declaration
+        let node_var_spec = node_var_declaration
             .named_children(&mut tree_cursor)
             .find(|node| node.kind() == "var_spec")
             .ok_or_else(|| {

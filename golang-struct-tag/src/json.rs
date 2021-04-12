@@ -1,6 +1,6 @@
 use pest::iterators::Pairs;
 
-use crate::{error::ParseError, struct_tag_parser::Rule};
+use crate::{convention_struct_tag_parser::Rule, StructTagParseError};
 
 #[derive(PartialEq, Eq, Debug, Clone)]
 pub enum JsonStructTag {
@@ -32,12 +32,14 @@ impl From<&str> for JsonStructTagOption {
 }
 
 impl JsonStructTag {
-    pub(crate) fn from_json_pairs(mut pairs: Pairs<'_, Rule>) -> Result<Self, ParseError> {
-        let name_pair = pairs.next().ok_or(ParseError::Unknown)?;
+    pub(crate) fn from_json_pairs(mut pairs: Pairs<'_, Rule>) -> Result<Self, StructTagParseError> {
+        let name_pair = pairs.next().ok_or(StructTagParseError::Unknown)?;
         let name = name_pair.as_str();
+
         if name == "-" && pairs.peek().is_none() {
             return Ok(Self::Ignored);
         }
+
         let name = if name.is_empty() {
             None
         } else {
