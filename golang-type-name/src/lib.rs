@@ -1,5 +1,7 @@
 use std::str::{self, FromStr};
 
+use tree_sitter::Node;
+
 #[derive(PartialEq, Eq, Debug, Clone)]
 pub enum TypeName {
     // https://golang.org/ref/spec#Boolean_types
@@ -84,57 +86,68 @@ impl FromStr for TypeName {
         })?;
 
         match node_type.kind() {
-            "qualified_type" => {
-                let node_package = node_type.named_child(0).ok_or_else(|| {
-                    TypeNameParseError::TreeSitterParseFailed(
-                        "Not found qualified package".to_string(),
-                    )
-                })?;
-                let node_identifier = node_type.named_child(1).ok_or_else(|| {
-                    TypeNameParseError::TreeSitterParseFailed(
-                        "Not found qualified identifier".to_string(),
-                    )
-                })?;
-
-                let package_name = node_package
-                    .utf8_text(source)
-                    .map_err(TypeNameParseError::Utf8Error)?;
-                let identifier_name = node_identifier
-                    .utf8_text(source)
-                    .map_err(TypeNameParseError::Utf8Error)?;
-
-                Ok(Self::QualifiedIdent(
-                    package_name.to_owned(),
-                    identifier_name.to_owned(),
-                ))
-            }
-            "type_identifier" => match s {
-                //
-                "bool" => Ok(Self::Bool),
-                //
-                "uint8" | "byte" => Ok(Self::Uint8),
-                "uint16" => Ok(Self::Uint16),
-                "uint32" => Ok(Self::Uint32),
-                "uint64" => Ok(Self::Uint64),
-                "int8" => Ok(Self::Int8),
-                "int16" => Ok(Self::Int16),
-                "int32" | "rune" => Ok(Self::Int32),
-                "int64" => Ok(Self::Int64),
-                "float32" => Ok(Self::Float32),
-                "float64" => Ok(Self::Float64),
-                "complex64" => Ok(Self::Complex64),
-                "complex128" => Ok(Self::Complex128),
-                "uint" => Ok(Self::Uint),
-                "int" => Ok(Self::Int),
-                "uintptr" => Ok(Self::Uintptr),
-                //
-                "string" => Ok(Self::String),
-                //
-                _ => Ok(Self::Identifier(s.to_owned())),
-            },
+            "qualified_type" => Self::from_qualified_type_node(node_type, source),
+            "type_identifier" => Self::from_type_identifier_node(node_type, source),
             _ => Err(TypeNameParseError::UnsupportedType(
                 node_type.kind().to_owned(),
             )),
+        }
+    }
+}
+
+impl TypeName {
+    pub fn from_qualified_type_node(node: Node, source: &[u8]) -> Result<Self, TypeNameParseError> {
+        let node_package = node.named_child(0).ok_or_else(|| {
+            TypeNameParseError::TreeSitterParseFailed("Not found qualified package".to_string())
+        })?;
+        let node_identifier = node.named_child(1).ok_or_else(|| {
+            TypeNameParseError::TreeSitterParseFailed("Not found qualified identifier".to_string())
+        })?;
+
+        let package_name = node_package
+            .utf8_text(source)
+            .map_err(TypeNameParseError::Utf8Error)?;
+        let identifier_name = node_identifier
+            .utf8_text(source)
+            .map_err(TypeNameParseError::Utf8Error)?;
+
+        Ok(Self::QualifiedIdent(
+            package_name.to_owned(),
+            identifier_name.to_owned(),
+        ))
+    }
+
+    pub fn from_type_identifier_node(
+        node: Node,
+        source: &[u8],
+    ) -> Result<Self, TypeNameParseError> {
+        let s = node
+            .utf8_text(source)
+            .map_err(TypeNameParseError::Utf8Error)?;
+
+        match s {
+            //
+            "bool" => Ok(Self::Bool),
+            //
+            "uint8" | "byte" => Ok(Self::Uint8),
+            "uint16" => Ok(Self::Uint16),
+            "uint32" => Ok(Self::Uint32),
+            "uint64" => Ok(Self::Uint64),
+            "int8" => Ok(Self::Int8),
+            "int16" => Ok(Self::Int16),
+            "int32" | "rune" => Ok(Self::Int32),
+            "int64" => Ok(Self::Int64),
+            "float32" => Ok(Self::Float32),
+            "float64" => Ok(Self::Float64),
+            "complex64" => Ok(Self::Complex64),
+            "complex128" => Ok(Self::Complex128),
+            "uint" => Ok(Self::Uint),
+            "int" => Ok(Self::Int),
+            "uintptr" => Ok(Self::Uintptr),
+            //
+            "string" => Ok(Self::String),
+            //
+            _ => Ok(Self::Identifier(s.to_owned())),
         }
     }
 }
