@@ -30,8 +30,6 @@ pub enum TypeParseError {
     TreeSitterLanguageError(String),
     #[error("TreeSitterParseFailed {0}")]
     TreeSitterParseFailed(String),
-    #[error("Utf8Error {0:?}")]
-    Utf8Error(str::Utf8Error),
     #[error("UnsupportedType {0}")]
     UnsupportedType(String),
     //
