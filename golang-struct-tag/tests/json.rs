@@ -3,7 +3,7 @@ use std::{error, fs, path::PathBuf};
 use golang_struct_tag::{ConventionStructTag, JsonStructTag, JsonStructTagOption, StructTag};
 
 #[test]
-fn json_simple() -> Result<(), Box<dyn error::Error>> {
+fn test_parse() -> Result<(), Box<dyn error::Error>> {
     let content = fs::read_to_string(PathBuf::new().join("tests/files/json.txt"))?;
     for line in content.lines() {
         let mut split = line.split("\t");

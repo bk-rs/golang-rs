@@ -188,7 +188,7 @@ mod tests {
     use std::error;
 
     #[test]
-    fn simple() -> Result<(), Box<dyn error::Error>> {
+    fn test_parse() -> Result<(), Box<dyn error::Error>> {
         assert_eq!(
             StructTag::RawStringLiteral(r#"`foo"bar`"#.to_owned()),
             r#"`foo"bar`"#.parse()?

@@ -18,6 +18,7 @@ impl Parse for LetTypeNameInput {
         input.parse::<Token![,]>()?;
 
         let type_name = input.parse::<LitStr>()?;
+
         let type_name: TypeName = type_name
             .value()
             .parse()

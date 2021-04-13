@@ -1,7 +1,7 @@
 use std::str::{self, FromStr};
 
-use proc_macro2::TokenStream;
-use quote::{quote, ToTokens, TokenStreamExt as _};
+use proc_macro2::{Punct, Spacing, TokenStream};
+use quote::{format_ident, quote, ToTokens, TokenStreamExt as _};
 use tree_sitter::Node;
 
 #[derive(PartialEq, Eq, Debug, Clone)]
@@ -175,11 +175,23 @@ impl ToTokens for TypeName {
             Self::Uint => tokens.append_all(quote!(::core::primitive::usize)),
             Self::Int => tokens.append_all(quote!(::core::primitive::isize)),
             Self::Uintptr => tokens.append_all(quote!(::core::primitive::usize)),
-            Self::String => tokens.append_all(quote!(::alloc::string::String)),
-            Self::QualifiedIdent(package_str, str) => {
-                tokens.append_all(quote!(::#package_str::#str))
+            Self::String => tokens.append_all(quote!(::std::string::String)),
+            Self::QualifiedIdent(package_str, identifier_str) => {
+                let package_ident = format_ident!("{}", package_str);
+                let identifier_ident = format_ident!("{}", identifier_str);
+
+                tokens.append(Punct::new(':', Spacing::Joint));
+                tokens.append(Punct::new(':', Spacing::Alone));
+                tokens.append_all(quote!(#package_ident));
+                tokens.append(Punct::new(':', Spacing::Joint));
+                tokens.append(Punct::new(':', Spacing::Alone));
+                tokens.append_all(quote!(#identifier_ident));
             }
-            Self::Identifier(str) => tokens.append_all(quote!(#str)),
+            Self::Identifier(identifier_str) => {
+                let identifier_ident = format_ident!("{}", identifier_str);
+
+                tokens.append_all(quote!(#identifier_ident));
+            }
         }
     }
 }
