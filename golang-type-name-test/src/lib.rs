@@ -29,7 +29,7 @@ impl Parse for LetTypeNameInput {
 }
 
 #[proc_macro]
-pub fn expand_let_type_name(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+pub fn let_type_name(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let input = parse_macro_input!(input as LetTypeNameInput);
 
     let name = input.name;
