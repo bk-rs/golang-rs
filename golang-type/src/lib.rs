@@ -11,9 +11,9 @@ pub mod pointer_type;
 pub mod slice_type;
 
 pub use self::array_type::{ArrayLength, ArrayType, ArrayTypeParseError};
-pub use self::map_type::MapType;
-pub use self::pointer_type::PointerType;
-pub use self::slice_type::SliceType;
+pub use self::map_type::{MapType, MapTypeParseError};
+pub use self::pointer_type::{PointerType, PointerTypeParseError};
+pub use self::slice_type::{SliceType, SliceTypeParseError};
 
 #[derive(PartialEq, Eq, Debug, Clone)]
 pub enum Type {
@@ -39,6 +39,12 @@ pub enum TypeParseError {
     TypeNameParseError(#[from] TypeNameParseError),
     #[error("ArrayTypeParseError {0:?}")]
     ArrayTypeParseError(#[from] ArrayTypeParseError),
+    #[error("MapTypeParseError {0:?}")]
+    MapTypeParseError(#[from] MapTypeParseError),
+    #[error("PointerTypeParseError {0:?}")]
+    PointerTypeParseError(#[from] PointerTypeParseError),
+    #[error("SliceTypeParseError {0:?}")]
+    SliceTypeParseError(#[from] SliceTypeParseError),
 }
 
 impl FromStr for Type {
@@ -96,6 +102,11 @@ impl Type {
                 .map(Self::TypeName)
                 .map_err(Into::into),
             "array_type" => ArrayType::from_array_type_node(node, source).map(Self::ArrayType),
+            "map_type" => MapType::from_map_type_node(node, source).map(Self::MapType),
+            "pointer_type" => {
+                PointerType::from_pointer_type_node(node, source).map(Self::PointerType)
+            }
+            "slice_type" => SliceType::from_slice_type_node(node, source).map(Self::SliceType),
             _ => Err(TypeParseError::UnsupportedType(node.kind().to_owned())),
         }
     }
