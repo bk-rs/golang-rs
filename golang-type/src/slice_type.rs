@@ -1,3 +1,5 @@
+use proc_macro2::{Punct, Spacing, TokenStream};
+use quote::{format_ident, quote, ToTokens, TokenStreamExt as _};
 use tree_sitter::Node;
 
 use crate::{Type, TypeParseError};
@@ -23,5 +25,16 @@ impl SliceType {
         Ok(Self {
             element: element.into(),
         })
+    }
+}
+
+impl ToTokens for SliceType {
+    fn to_tokens(&self, tokens: &mut TokenStream) {
+        let vec_ident = format_ident!("{}", "Vec");
+        tokens.append_all(quote!(#vec_ident));
+        tokens.append(Punct::new('<', Spacing::Alone));
+        let element = &self.element;
+        tokens.append_all(quote!(#element));
+        tokens.append(Punct::new('>', Spacing::Alone));
     }
 }

@@ -1,3 +1,5 @@
+use proc_macro2::{Punct, Spacing, TokenStream};
+use quote::{quote, ToTokens, TokenStreamExt as _};
 use tree_sitter::Node;
 
 use crate::{Type, TypeParseError};
@@ -29,5 +31,18 @@ impl MapType {
             key: key.into(),
             value: value.into(),
         })
+    }
+}
+
+impl ToTokens for MapType {
+    fn to_tokens(&self, tokens: &mut TokenStream) {
+        tokens.append_all(quote!(::std::collections::HashMap));
+        tokens.append(Punct::new('<', Spacing::Alone));
+        let key = &self.key;
+        tokens.append_all(quote!(#key));
+        tokens.append(Punct::new(',', Spacing::Alone));
+        let value = &self.value;
+        tokens.append_all(quote!(#value));
+        tokens.append(Punct::new('>', Spacing::Alone));
     }
 }

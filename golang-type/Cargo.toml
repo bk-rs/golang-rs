@@ -18,4 +18,7 @@ golang-type-name = { version = "0.0", path = "../golang-type-name" }
 tree-sitter = { version = "0.17", default-features = false }
 tree-sitter-go = { version = "0.16", default-features = false } 
 
+proc-macro2 = { version = "1.0", default-features = false }
+quote = { version = "1.0", default-features = false }
+
 thiserror = { version = "1.0", default-features = false }

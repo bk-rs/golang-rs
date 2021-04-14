@@ -1,0 +1,16 @@
+[package]
+name = "golang-type-test"
+version = "0.1.0"
+authors = ["vkill <vkill.net@gmail.com>"]
+edition = "2018"
+publish = false
+
+[lib]
+proc-macro = true
+
+[dependencies]
+golang-type = { version = "0.0", path = "../golang-type" }
+
+proc-macro2 = { version = "1.0", default-features = false }
+syn = { version = "1.0", default-features = false, features = ["full"] }
+quote = { version = "1.0", default-features = false }

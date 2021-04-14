@@ -3,6 +3,8 @@ pub use golang_type_name;
 use std::str::{self, FromStr};
 
 use golang_type_name::{TypeName, TypeNameParseError};
+use proc_macro2::TokenStream;
+use quote::{quote, ToTokens, TokenStreamExt as _};
 use tree_sitter::Node;
 
 pub mod array_type;
@@ -106,6 +108,18 @@ impl Type {
             }
             "slice_type" => SliceType::from_slice_type_node(node, source).map(Self::SliceType),
             _ => Err(TypeParseError::UnsupportedType(node.kind().to_owned())),
+        }
+    }
+}
+
+impl ToTokens for Type {
+    fn to_tokens(&self, tokens: &mut TokenStream) {
+        match self {
+            Type::TypeName(type_name) => tokens.append_all(quote!(#type_name)),
+            Type::ArrayType(array_type) => tokens.append_all(quote!(#array_type)),
+            Type::PointerType(pointer_type) => tokens.append_all(quote!(#pointer_type)),
+            Type::SliceType(slice_type) => tokens.append_all(quote!(#slice_type)),
+            Type::MapType(map_type) => tokens.append_all(quote!(#map_type)),
         }
     }
 }
