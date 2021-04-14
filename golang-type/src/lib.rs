@@ -164,13 +164,25 @@ impl ToTokens for Type {
             Self::TypeName(type_name) => tokens.append_all(quote!(#type_name)),
             //
             Self::ArrayType(array_type) => tokens.append_all(quote!(#array_type)),
-            Self::StructType(_struct_type) => unimplemented!(),
+            Self::StructType(_) => {
+                let err = "impl ToTokens for StructType is unsupported";
+                tokens.append_all(quote!(compile_error!(#err)))
+            }
             Self::PointerType(pointer_type) => tokens.append_all(quote!(#pointer_type)),
-            Self::FunctionType(_function_type) => unimplemented!(),
-            Self::InterfaceType(_interface_type) => unimplemented!(),
+            Self::FunctionType(_) => {
+                let err = "impl ToTokens for FunctionType is unsupported";
+                tokens.append_all(quote!(compile_error!(#err)))
+            }
+            Self::InterfaceType(_) => {
+                let err = "impl ToTokens for InterfaceType is unsupported";
+                tokens.append_all(quote!(compile_error!(#err)))
+            }
             Self::SliceType(slice_type) => tokens.append_all(quote!(#slice_type)),
             Self::MapType(map_type) => tokens.append_all(quote!(#map_type)),
-            Self::ChannelType(channel_type) => tokens.append_all(quote!(#channel_type)),
+            Self::ChannelType(_) => {
+                let err = "impl ToTokens for ChannelType is unsupported";
+                tokens.append_all(quote!(compile_error!(#err)))
+            }
             //
             Self::ParenthesizedType(parenthesized_type) => {
                 tokens.append_all(quote!(#parenthesized_type))
