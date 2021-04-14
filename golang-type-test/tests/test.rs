@@ -4,8 +4,8 @@ use std::{
 };
 
 macro_rules! assert_let_type {
-    ($type_name:literal, $value:expr, $type:ty) => {
-        golang_type_test::let_type!(v, $type_name);
+    ($type_lit:literal, $value:expr, $type:ty) => {
+        golang_type_test::let_type!(v, $type_lit);
         v = $value;
         assert_eq!(v.type_id(), TypeId::of::<$type>());
     };

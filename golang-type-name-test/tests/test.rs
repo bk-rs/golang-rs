@@ -4,8 +4,8 @@ use num_complex::{Complex32, Complex64};
 use proc_macro2::{Ident, Span};
 
 macro_rules! assert_let_type_name {
-    ($type_name:literal, $value:expr, $type:ty) => {
-        golang_type_name_test::let_type_name!(v, $type_name);
+    ($type_name_lit:literal, $value:expr, $type:ty) => {
+        golang_type_name_test::let_type_name!(v, $type_name_lit);
         v = $value;
         assert_eq!(v.type_id(), TypeId::of::<$type>());
     };
