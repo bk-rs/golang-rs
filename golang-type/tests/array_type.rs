@@ -10,7 +10,7 @@ fn test_parse() -> Result<(), Box<dyn error::Error>> {
             1 => assert_eq!(
                 Type::ArrayType(ArrayType {
                     length: ArrayLength::IntLiteral(32),
-                    element: Type::TypeName(TypeName::Uint8).into()
+                    element: Type::TypeName(TypeName::Byte).into()
                 }),
                 str.parse()?
             ),
