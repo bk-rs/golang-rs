@@ -39,9 +39,9 @@ fn test_builtin() {
 #[test]
 fn test_qualified_identifier() {
     assert_let_type_name!(
-        "syn.Ident",
+        "proc_macro2.Ident",
         Ident::new("foo", Span::call_site()),
-        syn::Ident
+        proc_macro2::Ident
     );
 }
 
