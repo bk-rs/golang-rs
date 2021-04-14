@@ -49,6 +49,8 @@ pub enum TypeNameParseError {
     Utf8Error(str::Utf8Error),
     #[error("UnsupportedType {0}")]
     UnsupportedType(String),
+    #[error("IdentifierMissing")]
+    IdentifierMissing,
 }
 
 impl FromStr for TypeName {
@@ -130,6 +132,10 @@ impl TypeName {
         let s = node
             .utf8_text(source)
             .map_err(TypeNameParseError::Utf8Error)?;
+
+        if s.is_empty() {
+            return Err(TypeNameParseError::IdentifierMissing);
+        }
 
         match s {
             //
@@ -339,5 +345,14 @@ mod tests {
         }
 
         Ok(())
+    }
+
+    #[test]
+    fn test_parse_with_identifier_missing() {
+        match "".parse::<TypeName>() {
+            Ok(_) => assert!(false),
+            Err(TypeNameParseError::IdentifierMissing) => {}
+            Err(err) => assert!(false, "{:?}", err),
+        }
     }
 }

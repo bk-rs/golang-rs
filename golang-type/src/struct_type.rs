@@ -22,10 +22,14 @@ pub struct StructField {
 pub enum StructTypeParseError {
     #[error("TreeSitterParseFailed {0}")]
     TreeSitterParseFailed(String),
+    #[error("UnsupportedNodeKind {0}")]
+    UnsupportedNodeKind(String),
     #[error("Utf8Error {0:?}")]
     Utf8Error(str::Utf8Error),
-    #[error("UnsupportedType {0}")]
-    UnsupportedType(String),
+    #[error("UnexpectedType {0}")]
+    UnexpectedType(String),
+    #[error("DuplicateField {0}")]
+    DuplicateField(String),
 
     #[error("StructTagParseError {0:?}")]
     StructTagParseError(#[from] StructTagParseError),
@@ -53,12 +57,18 @@ impl StructType {
                 "field_declaration" => {}
                 "comment" => continue,
                 _ => {
-                    return Err(StructTypeParseError::UnsupportedType(
+                    return Err(StructTypeParseError::UnsupportedNodeKind(
                         node_field_declaration.kind().to_owned(),
                     )
                     .into())
                 }
             }
+
+            // TODO, try parse
+            // func()
+            // map[string]int
+            //
+
             let mut i = 0;
             let mut node_field_declaration_names = vec![];
             let node_field_declaration_type = loop {
@@ -96,7 +106,7 @@ impl StructType {
                         .map_err(StructTypeParseError::StructTagParseError)?,
                     ),
                     _ => {
-                        return Err(StructTypeParseError::UnsupportedType(
+                        return Err(StructTypeParseError::UnsupportedNodeKind(
                             node_field_declaration_tag.kind().to_owned(),
                         )
                         .into())
@@ -115,7 +125,7 @@ impl StructType {
                                 TypeNameWrapper(type_name).struct_field_name()
                             }
                             _ => {
-                                return Err(StructTypeParseError::UnsupportedType(format!(
+                                return Err(StructTypeParseError::UnexpectedType(format!(
                                     "unexpected type {:?}",
                                     pointer_type_element
                                 ))
@@ -124,7 +134,7 @@ impl StructType {
                         }
                     }
                     _ => {
-                        return Err(StructTypeParseError::UnsupportedType(format!(
+                        return Err(StructTypeParseError::UnexpectedType(format!(
                             "unexpected type {:?}",
                             &r#type
                         ))
@@ -133,7 +143,7 @@ impl StructType {
                 };
 
                 if field_names.contains(&name) {
-                    return Err(StructTypeParseError::UnsupportedType(format!(
+                    return Err(StructTypeParseError::DuplicateField(format!(
                         "duplicate field {}",
                         name
                     ))
@@ -156,7 +166,7 @@ impl StructType {
                         .to_owned();
 
                     if field_names.contains(&name) {
-                        return Err(StructTypeParseError::UnsupportedType(format!(
+                        return Err(StructTypeParseError::DuplicateField(format!(
                             "duplicate field {}",
                             name
                         ))

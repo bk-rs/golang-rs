@@ -3,7 +3,8 @@ use std::{error, fs, path::PathBuf};
 use golang_type::{
     golang_struct_tag::{ConventionStructTag, StructTag},
     golang_type_name::TypeName,
-    FunctionType, PointerType, SliceType, StructField, StructType, Type,
+    FunctionType, PointerType, SliceType, StructField, StructType, StructTypeParseError, Type,
+    TypeParseError,
 };
 
 #[test]
@@ -159,6 +160,61 @@ fn test_parse_tag() -> Result<(), Box<dyn error::Error>> {
             ]
         })
     );
+
+    Ok(())
+}
+
+// TODO
+// #[test]
+// fn test_parse_with_unexpected_type() -> Result<(), Box<dyn error::Error>> {
+//     match r#"
+//     struct {
+// 		map[string]int
+// 	}
+//     "#
+//     .parse::<Type>()
+//     {
+//         Ok(_) => assert!(false),
+//         Err(TypeParseError::StructTypeParseError(StructTypeParseError::UnexpectedType(
+//             ref err,
+//         ))) if err.starts_with("unexpected type ") => {}
+//         Err(err) => assert!(false, "{:?}", err),
+//     }
+
+//     Ok(())
+// }
+
+#[test]
+fn test_parse_with_duplicate_field() -> Result<(), Box<dyn error::Error>> {
+    match r#"
+    struct {
+		int
+		int
+	}
+    "#
+    .parse::<Type>()
+    {
+        Ok(_) => assert!(false),
+        Err(TypeParseError::StructTypeParseError(StructTypeParseError::DuplicateField(
+            ref err,
+        ))) if err == "duplicate field int" => {}
+        Err(err) => assert!(false, "{:?}", err),
+    }
+
+    match r#"
+    struct {
+		a int
+		a uint
+	}
+    "#
+    .parse::<Type>()
+    {
+        Ok(_) => assert!(false),
+        Err(TypeParseError::StructTypeParseError(StructTypeParseError::DuplicateField(
+            ref err,
+        ))) if err == "duplicate field a" => {}
+        Err(err) => assert!(false, "{}", err),
+    }
 
     Ok(())
 }
