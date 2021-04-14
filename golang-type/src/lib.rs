@@ -1,3 +1,4 @@
+pub use golang_struct_tag;
 pub use golang_type_name;
 
 use std::str::{self, FromStr};
@@ -25,7 +26,7 @@ pub use self::map_type::{MapType, MapTypeParseError};
 pub use self::parenthesized_type::{ParenthesizedType, ParenthesizedTypeParseError};
 pub use self::pointer_type::{PointerType, PointerTypeParseError};
 pub use self::slice_type::{SliceType, SliceTypeParseError};
-pub use self::struct_type::{StructType, StructTypeParseError};
+pub use self::struct_type::{StructField, StructType, StructTypeParseError};
 
 #[derive(PartialEq, Eq, Debug, Clone)]
 pub enum Type {

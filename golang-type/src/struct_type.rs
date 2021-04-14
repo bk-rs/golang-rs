@@ -49,36 +49,39 @@ impl StructType {
         let mut field_names = vec![];
 
         for node_field_declaration in node_field_declaration_list.named_children(&mut tree_cursor) {
+            match node_field_declaration.kind() {
+                "field_declaration" => {}
+                "comment" => continue,
+                _ => {
+                    return Err(StructTypeParseError::UnsupportedType(
+                        node_field_declaration.kind().to_owned(),
+                    )
+                    .into())
+                }
+            }
             let mut i = 0;
             let mut node_field_declaration_names = vec![];
             let node_field_declaration_type = loop {
                 let node_field_declaration_name_or_type =
                     node_field_declaration.named_child(i).ok_or_else(|| {
                         StructTypeParseError::TreeSitterParseFailed(
-                            "Not found field_declaration_list".to_string(),
+                            "Not found field_declaration name or type".to_string(),
                         )
                     })?;
+                i += 1;
 
                 match node_field_declaration_name_or_type.kind() {
                     "field_identifier" => {
                         node_field_declaration_names.push(node_field_declaration_name_or_type);
                     }
-                    "type_identifier" => break node_field_declaration_name_or_type,
-                    _ => {
-                        return Err(StructTypeParseError::TreeSitterParseFailed(
-                            "Not found field_declaration name or type".to_string(),
-                        )
-                        .into())
-                    }
+                    _ => break node_field_declaration_name_or_type,
                 }
-
-                i += 1;
             };
 
             let r#type = Type::from_var_spec_type_node(node_field_declaration_type, source)?;
 
             let tag = if let Some(node_field_declaration_tag) =
-                node_field_declaration.named_child(i + 1)
+                node_field_declaration.named_child(i)
             {
                 match node_field_declaration_tag.kind() {
                     "raw_string_literal" => Some(
