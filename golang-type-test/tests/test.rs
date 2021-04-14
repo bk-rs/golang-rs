@@ -40,3 +40,8 @@ fn test_map_type() {
         HashMap<String, Vec<String>>
     );
 }
+
+#[test]
+fn test_parenthesized_type() {
+    assert_let_type!("(int)", -1_isize, isize);
+}

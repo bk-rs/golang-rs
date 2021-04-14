@@ -9,21 +9,26 @@ use tree_sitter::Node;
 
 pub mod array_type;
 pub mod map_type;
+pub mod parenthesized_type;
 pub mod pointer_type;
 pub mod slice_type;
 
 pub use self::array_type::{ArrayLength, ArrayType, ArrayTypeParseError};
 pub use self::map_type::{MapType, MapTypeParseError};
+pub use self::parenthesized_type::{ParenthesizedType, ParenthesizedTypeParseError};
 pub use self::pointer_type::{PointerType, PointerTypeParseError};
 pub use self::slice_type::{SliceType, SliceTypeParseError};
 
 #[derive(PartialEq, Eq, Debug, Clone)]
 pub enum Type {
     TypeName(TypeName),
+    //
     ArrayType(ArrayType),
     PointerType(PointerType),
     SliceType(SliceType),
     MapType(MapType),
+    //
+    ParenthesizedType(ParenthesizedType),
 }
 
 #[derive(thiserror::Error, Debug)]
@@ -35,8 +40,10 @@ pub enum TypeParseError {
     #[error("UnsupportedType {0}")]
     UnsupportedType(String),
     //
+    //
     #[error("TypeNameParseError {0:?}")]
     TypeNameParseError(#[from] TypeNameParseError),
+    //
     #[error("ArrayTypeParseError {0:?}")]
     ArrayTypeParseError(#[from] ArrayTypeParseError),
     #[error("MapTypeParseError {0:?}")]
@@ -45,6 +52,9 @@ pub enum TypeParseError {
     PointerTypeParseError(#[from] PointerTypeParseError),
     #[error("SliceTypeParseError {0:?}")]
     SliceTypeParseError(#[from] SliceTypeParseError),
+    //
+    #[error("ParenthesizedTypeParseError {0:?}")]
+    ParenthesizedTypeParseError(#[from] ParenthesizedTypeParseError),
 }
 
 impl FromStr for Type {
@@ -95,18 +105,23 @@ impl Type {
         source: &[u8],
     ) -> Result<Self, TypeParseError> {
         match node.kind() {
+            //
             "qualified_type" => TypeName::from_qualified_type_node(node, source)
                 .map(Self::TypeName)
                 .map_err(Into::into),
             "type_identifier" => TypeName::from_type_identifier_node(node, source)
                 .map(Self::TypeName)
                 .map_err(Into::into),
+            //
             "array_type" => ArrayType::from_array_type_node(node, source).map(Self::ArrayType),
             "map_type" => MapType::from_map_type_node(node, source).map(Self::MapType),
             "pointer_type" => {
                 PointerType::from_pointer_type_node(node, source).map(Self::PointerType)
             }
             "slice_type" => SliceType::from_slice_type_node(node, source).map(Self::SliceType),
+            //
+            "parenthesized_type" => ParenthesizedType::from_parenthesized_type_node(node, source)
+                .map(Self::ParenthesizedType),
             _ => Err(TypeParseError::UnsupportedType(node.kind().to_owned())),
         }
     }
@@ -115,11 +130,17 @@ impl Type {
 impl ToTokens for Type {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         match self {
+            //
             Type::TypeName(type_name) => tokens.append_all(quote!(#type_name)),
+            //
             Type::ArrayType(array_type) => tokens.append_all(quote!(#array_type)),
             Type::PointerType(pointer_type) => tokens.append_all(quote!(#pointer_type)),
             Type::SliceType(slice_type) => tokens.append_all(quote!(#slice_type)),
             Type::MapType(map_type) => tokens.append_all(quote!(#map_type)),
+            //
+            Type::ParenthesizedType(parenthesized_type) => {
+                tokens.append_all(quote!(#parenthesized_type))
+            }
         }
     }
 }
