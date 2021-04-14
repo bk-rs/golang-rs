@@ -3,7 +3,7 @@ use tree_sitter::Node;
 use crate::{Type, TypeParseError};
 
 #[derive(PartialEq, Eq, Debug, Clone)]
-pub struct PointerType(Box<Type>);
+pub struct PointerType(pub Box<Type>);
 
 #[derive(thiserror::Error, Debug)]
 pub enum PointerTypeParseError {
@@ -15,7 +15,7 @@ impl PointerType {
         node: Node,
         source: &[u8],
     ) -> Result<Self, TypeParseError> {
-        let node_pointer_type_element = node.named_child(1).ok_or_else(|| {
+        let node_pointer_type_element = node.named_child(0).ok_or_else(|| {
             PointerTypeParseError::TreeSitterParseFailed(
                 "Not found pointer_type element".to_string(),
             )

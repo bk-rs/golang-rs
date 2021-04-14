@@ -205,11 +205,7 @@ mod tests {
     #[test]
     fn test_parse() -> Result<(), Box<dyn error::Error>> {
         let content = fs::read_to_string(PathBuf::new().join("tests/files/type_names.txt"))?;
-        for (i, line) in content.lines().enumerate() {
-            let mut split = line.split("\t");
-            let str = split.next().unwrap();
-            assert!(split.next().is_none());
-
+        for (i, str) in content.lines().enumerate() {
             match i + 1 {
                 //
                 1 => assert_eq!(TypeName::Bool, str.parse()?),
