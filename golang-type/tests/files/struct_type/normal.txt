@@ -1,0 +1,7 @@
+struct {
+	x, y int
+	u    float32
+	_    float32 // padding
+	A    *[]int
+	F    func()
+}
