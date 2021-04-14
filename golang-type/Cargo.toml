@@ -14,6 +14,7 @@ readme = "README.md"
 
 [dependencies]
 golang-type-name = { version = "0.0", path = "../golang-type-name" }
+golang-struct-tag = { version = "0.0", path = "../golang-struct-tag" }
 
 tree-sitter = { version = "0.17", default-features = false }
 tree-sitter-go = { version = "0.16", default-features = false } 

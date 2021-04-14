@@ -15,6 +15,7 @@ impl ChannelType {
         _node: Node,
         _source: &[u8],
     ) -> Result<Self, TypeParseError> {
-        unimplemented!()
+        // TODO
+        Ok(Self {})
     }
 }

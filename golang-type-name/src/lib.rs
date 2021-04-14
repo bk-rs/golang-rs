@@ -158,6 +158,34 @@ impl TypeName {
             _ => Ok(Self::Identifier(s.to_owned())),
         }
     }
+
+    pub fn name(&self) -> String {
+        match self {
+            Self::Bool => "bool".to_owned(),
+            Self::Uint8 => "uint8".to_owned(),
+            Self::Uint16 => "uint16".to_owned(),
+            Self::Uint32 => "uint32".to_owned(),
+            Self::Uint64 => "uint64".to_owned(),
+            Self::Int8 => "int8".to_owned(),
+            Self::Int16 => "int16".to_owned(),
+            Self::Int32 => "int32".to_owned(),
+            Self::Int64 => "int64".to_owned(),
+            Self::Float32 => "float32".to_owned(),
+            Self::Float64 => "float64".to_owned(),
+            Self::Complex64 => "complex64".to_owned(),
+            Self::Complex128 => "complex128".to_owned(),
+            Self::Byte => "byte".to_owned(),
+            Self::Rune => "rune".to_owned(),
+            Self::Uint => "uint".to_owned(),
+            Self::Int => "int".to_owned(),
+            Self::Uintptr => "uintptr".to_owned(),
+            Self::String => "string".to_owned(),
+            Self::QualifiedIdent(package_str, identifier_str) => {
+                format!("{}.{}", package_str, identifier_str)
+            }
+            Self::Identifier(identifier_str) => identifier_str.to_owned(),
+        }
+    }
 }
 
 impl ToTokens for TypeName {
@@ -212,34 +240,100 @@ mod tests {
         for (i, str) in content.lines().enumerate() {
             match i + 1 {
                 //
-                1 => assert_eq!(TypeName::Bool, str.parse()?),
+                1 => {
+                    assert_eq!(TypeName::Bool, str.parse()?);
+                    assert_eq!(TypeName::Bool.name(), str)
+                }
                 //
-                2 => assert_eq!(TypeName::Uint8, str.parse()?),
-                3 => assert_eq!(TypeName::Uint16, str.parse()?),
-                4 => assert_eq!(TypeName::Uint32, str.parse()?),
-                5 => assert_eq!(TypeName::Uint64, str.parse()?),
-                6 => assert_eq!(TypeName::Int8, str.parse()?),
-                7 => assert_eq!(TypeName::Int16, str.parse()?),
-                8 => assert_eq!(TypeName::Int32, str.parse()?),
-                9 => assert_eq!(TypeName::Int64, str.parse()?),
-                10 => assert_eq!(TypeName::Float32, str.parse()?),
-                11 => assert_eq!(TypeName::Float64, str.parse()?),
-                12 => assert_eq!(TypeName::Complex64, str.parse()?),
-                13 => assert_eq!(TypeName::Complex128, str.parse()?),
-                14 => assert_eq!(TypeName::Byte, str.parse()?),
-                15 => assert_eq!(TypeName::Rune, str.parse()?),
-                16 => assert_eq!(TypeName::Uint, str.parse()?),
-                17 => assert_eq!(TypeName::Int, str.parse()?),
-                18 => assert_eq!(TypeName::Uintptr, str.parse()?),
+                2 => {
+                    assert_eq!(TypeName::Uint8, str.parse()?);
+                    assert_eq!(TypeName::Uint8.name(), str)
+                }
+                3 => {
+                    assert_eq!(TypeName::Uint16, str.parse()?);
+                    assert_eq!(TypeName::Uint16.name(), str)
+                }
+                4 => {
+                    assert_eq!(TypeName::Uint32, str.parse()?);
+                    assert_eq!(TypeName::Uint32.name(), str)
+                }
+                5 => {
+                    assert_eq!(TypeName::Uint64, str.parse()?);
+                    assert_eq!(TypeName::Uint64.name(), str)
+                }
+                6 => {
+                    assert_eq!(TypeName::Int8, str.parse()?);
+                    assert_eq!(TypeName::Int8.name(), str)
+                }
+                7 => {
+                    assert_eq!(TypeName::Int16, str.parse()?);
+                    assert_eq!(TypeName::Int16.name(), str)
+                }
+                8 => {
+                    assert_eq!(TypeName::Int32, str.parse()?);
+                    assert_eq!(TypeName::Int32.name(), str)
+                }
+                9 => {
+                    assert_eq!(TypeName::Int64, str.parse()?);
+                    assert_eq!(TypeName::Int64.name(), str)
+                }
+                10 => {
+                    assert_eq!(TypeName::Float32, str.parse()?);
+                    assert_eq!(TypeName::Float32.name(), str)
+                }
+                11 => {
+                    assert_eq!(TypeName::Float64, str.parse()?);
+                    assert_eq!(TypeName::Float64.name(), str)
+                }
+                12 => {
+                    assert_eq!(TypeName::Complex64, str.parse()?);
+                    assert_eq!(TypeName::Complex64.name(), str)
+                }
+                13 => {
+                    assert_eq!(TypeName::Complex128, str.parse()?);
+                    assert_eq!(TypeName::Complex128.name(), str)
+                }
+                14 => {
+                    assert_eq!(TypeName::Byte, str.parse()?);
+                    assert_eq!(TypeName::Byte.name(), str)
+                }
+                15 => {
+                    assert_eq!(TypeName::Rune, str.parse()?);
+                    assert_eq!(TypeName::Rune.name(), str)
+                }
+                16 => {
+                    assert_eq!(TypeName::Uint, str.parse()?);
+                    assert_eq!(TypeName::Uint.name(), str)
+                }
+                17 => {
+                    assert_eq!(TypeName::Int, str.parse()?);
+                    assert_eq!(TypeName::Int.name(), str)
+                }
+                18 => {
+                    assert_eq!(TypeName::Uintptr, str.parse()?);
+                    assert_eq!(TypeName::Uintptr.name(), str)
+                }
                 //
-                19 => assert_eq!(TypeName::String, str.parse()?),
+                19 => {
+                    assert_eq!(TypeName::String, str.parse()?);
+                    assert_eq!(TypeName::String.name(), str)
+                }
                 //
-                20 => assert_eq!(
-                    TypeName::QualifiedIdent("time".to_owned(), "Duration".to_owned()),
-                    str.parse()?
-                ),
+                20 => {
+                    assert_eq!(
+                        TypeName::QualifiedIdent("time".to_owned(), "Duration".to_owned()),
+                        str.parse()?
+                    );
+                    assert_eq!(
+                        TypeName::QualifiedIdent("time".to_owned(), "Duration".to_owned()).name(),
+                        str
+                    )
+                }
                 //
-                21 => assert_eq!(TypeName::Identifier("foo".to_owned()), str.parse()?),
+                21 => {
+                    assert_eq!(TypeName::Identifier("foo".to_owned()), str.parse()?);
+                    assert_eq!(TypeName::Identifier("foo".to_owned()).name(), str)
+                }
                 _ => assert!(false),
             }
         }
