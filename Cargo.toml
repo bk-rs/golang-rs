@@ -1,5 +1,6 @@
 [workspace]
 members = [
+    "golang-const-decl",
     "golang-parser",
     "golang-struct-tag",
     "golang-type",
@@ -7,4 +8,5 @@ members = [
     "golang-type-name",
     "golang-type-name-test",
     "golang-type-test",
+    "golang-var-decl",
 ]
