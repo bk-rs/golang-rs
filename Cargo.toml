@@ -3,6 +3,7 @@ members = [
     "golang-parser",
     "golang-struct-tag",
     "golang-type",
+    "golang-type-decl",
     "golang-type-name",
     "golang-type-name-test",
     "golang-type-test",
