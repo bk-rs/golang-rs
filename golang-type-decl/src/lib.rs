@@ -47,7 +47,7 @@ impl FromStr for TypeDecl {
         let node_type_declaration = node_source_file
             .named_children(&mut tree_cursor)
             .find(|node| node.kind() == "type_declaration")
-            .ok_or_else(|| TypeDeclParseError::NodeMissing("type_declaration"))?;
+            .ok_or(TypeDeclParseError::NodeMissing("type_declaration"))?;
 
         let mut type_specs = vec![];
         for node in node_type_declaration.named_children(&mut tree_cursor) {
