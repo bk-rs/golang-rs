@@ -116,15 +116,12 @@ impl FromStr for Type {
             TypeParseError::TreeSitterParseFailed("Not found var_spec type".to_string())
         })?;
 
-        Self::from_var_spec_type_node(node_var_spec_type, source)
+        Self::from_node(node_var_spec_type, source)
     }
 }
 
 impl Type {
-    pub(crate) fn from_var_spec_type_node(
-        node: Node,
-        source: &[u8],
-    ) -> Result<Self, TypeParseError> {
+    pub fn from_node(node: Node, source: &[u8]) -> Result<Self, TypeParseError> {
         match node.kind() {
             //
             "qualified_type" => TypeName::from_qualified_type_node(node, source)

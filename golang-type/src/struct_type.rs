@@ -88,7 +88,7 @@ impl StructType {
                 }
             };
 
-            let r#type = Type::from_var_spec_type_node(node_field_declaration_type, source)?;
+            let r#type = Type::from_node(node_field_declaration_type, source)?;
 
             let tag = if let Some(node_field_declaration_tag) =
                 node_field_declaration.named_child(i)

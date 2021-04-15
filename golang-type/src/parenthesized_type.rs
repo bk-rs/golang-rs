@@ -23,7 +23,7 @@ impl ParenthesizedType {
             )
         })?;
 
-        let element = Type::from_var_spec_type_node(node_parenthesized_type_element, source)?;
+        let element = Type::from_node(node_parenthesized_type_element, source)?;
 
         Ok(Self(element.into()))
     }

@@ -24,8 +24,8 @@ impl MapType {
             MapTypeParseError::TreeSitterParseFailed("Not found map_type value".to_string())
         })?;
 
-        let key = Type::from_var_spec_type_node(node_map_type_key, source)?;
-        let value = Type::from_var_spec_type_node(node_map_type_value, source)?;
+        let key = Type::from_node(node_map_type_key, source)?;
+        let value = Type::from_node(node_map_type_value, source)?;
 
         Ok(Self {
             key: key.into(),
