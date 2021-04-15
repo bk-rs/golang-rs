@@ -6,10 +6,7 @@ use crate::TypeParseError;
 pub struct FunctionType {}
 
 #[derive(thiserror::Error, Debug)]
-pub enum FunctionTypeParseError {
-    #[error("TreeSitterParseFailed {0}")]
-    TreeSitterParseFailed(String),
-}
+pub enum FunctionTypeParseError {}
 impl FunctionType {
     pub(crate) fn from_function_type_node(
         _node: Node,

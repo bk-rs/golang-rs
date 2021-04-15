@@ -6,10 +6,7 @@ use crate::TypeParseError;
 pub struct ChannelType {}
 
 #[derive(thiserror::Error, Debug)]
-pub enum ChannelTypeParseError {
-    #[error("TreeSitterParseFailed {0}")]
-    TreeSitterParseFailed(String),
-}
+pub enum ChannelTypeParseError {}
 impl ChannelType {
     pub(crate) fn from_channel_type_node(
         _node: Node,

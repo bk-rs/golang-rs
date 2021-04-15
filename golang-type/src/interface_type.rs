@@ -6,10 +6,7 @@ use crate::TypeParseError;
 pub struct InterfaceType {}
 
 #[derive(thiserror::Error, Debug)]
-pub enum InterfaceTypeParseError {
-    #[error("TreeSitterParseFailed {0}")]
-    TreeSitterParseFailed(String),
-}
+pub enum InterfaceTypeParseError {}
 impl InterfaceType {
     pub(crate) fn from_interface_type_node(
         _node: Node,
