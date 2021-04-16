@@ -40,13 +40,13 @@ impl FromStr for TypeDecl {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let parser = Parser::new(s)?;
         let source = parser.get_source();
-        let node_source_file = parser.get_root_node();
+        let root_node = parser.get_root_node();
 
         let mut type_specs = vec![];
 
-        let mut tree_cursor = node_source_file.walk();
-        let mut node_source_file_named_children_iter = node_source_file
-            .named_children(&mut tree_cursor)
+        let mut cursor = root_node.walk();
+        let mut node_source_file_named_children_iter = root_node
+            .named_children(&mut cursor)
             .filter(|x| x.kind() != NODE_KIND_COMMENT);
 
         if let Some(node_type_declaration) = node_source_file_named_children_iter.next() {
@@ -70,9 +70,8 @@ impl FromStr for TypeDecl {
             }
         }
 
-        match node_source_file_named_children_iter.next() {
-            Some(node) => return Err(TypeDeclParseError::NodeKindUnknown(node.kind().to_owned())),
-            None => {}
+        if let Some(node) = node_source_file_named_children_iter.next() {
+            return Err(TypeDeclParseError::NodeKindUnknown(node.kind().to_owned()));
         }
 
         Ok(Self { type_specs })

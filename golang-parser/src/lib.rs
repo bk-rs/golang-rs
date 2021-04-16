@@ -2,7 +2,7 @@ pub use tree_sitter;
 
 use tree_sitter::{Node, Tree};
 
-pub const NODE_KIND_COMMENT: &'static str = "comment";
+pub const NODE_KIND_COMMENT: &str = "comment";
 
 pub struct Parser {
     code: String,
