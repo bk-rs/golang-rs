@@ -1,3 +1,5 @@
+pub use golang_type;
+
 use std::str::FromStr;
 
 use golang_parser::Parser;

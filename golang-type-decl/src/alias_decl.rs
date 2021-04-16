@@ -5,8 +5,8 @@ use golang_type::{Type, TypeParseError};
 
 #[derive(PartialEq, Eq, Debug, Clone)]
 pub struct AliasDecl {
-    name: String,
-    r#type: Type,
+    pub name: String,
+    pub r#type: Type,
 }
 
 #[derive(thiserror::Error, Debug)]

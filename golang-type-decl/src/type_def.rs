@@ -5,8 +5,8 @@ use golang_type::{Type, TypeParseError};
 
 #[derive(PartialEq, Eq, Debug, Clone)]
 pub struct TypeDef {
-    name: String,
-    r#type: Type,
+    pub name: String,
+    pub r#type: Type,
 }
 
 #[derive(thiserror::Error, Debug)]
@@ -24,7 +24,7 @@ impl TypeDef {
         node: Node,
         source: &[u8],
     ) -> Result<Self, TypeDefParseError> {
-        debug_assert!(node.kind() == "type_alias");
+        debug_assert!(node.kind() == "type_spec");
 
         let node_name = node
             .named_child(0)

@@ -1,9 +1,8 @@
 pub use golang_struct_tag;
-pub use golang_type_name;
+pub use golang_type_name::{self, TypeName, TypeNameParseError};
 
 use std::str::{self, FromStr};
 
-use golang_type_name::{TypeName, TypeNameParseError};
 use proc_macro2::TokenStream;
 use quote::{quote, ToTokens, TokenStreamExt as _};
 use tree_sitter::Node;
