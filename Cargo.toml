@@ -9,6 +9,5 @@ members = [
     "golang-type-decl",
     "golang-type-name",
     "golang-type-name-test",
-    "golang-type-test",
     "golang-var-decl",
 ]

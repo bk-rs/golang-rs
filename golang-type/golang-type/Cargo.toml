@@ -12,10 +12,6 @@ keywords = []
 categories = []
 readme = "README.md"
 
-[features]
-default = []
-with-macro = ["golang-type-macro"]
-
 [dependencies]
 golang-type-core = { version = "0.0", path = "../golang-type-core" }
-golang-type-macro = { version = "0.0", path = "../golang-type-macro", optional = true }
+golang-type-macro = { version = "0.0", path = "../golang-type-macro" }
