@@ -16,7 +16,7 @@ readme = "README.md"
 proc-macro = true
 
 [dependencies]
-golang-type-core = { version = "0.0", path = "../golang-type-core" }
+golang-type-core = { version = "0.0", features = ["enable-quote-to_tokens"], path = "../golang-type-core" }
 
 proc-macro2 = { version = "1.0", default-features = false }
 quote = { version = "1.0", default-features = false }

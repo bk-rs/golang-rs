@@ -12,6 +12,10 @@ keywords = []
 categories = []
 readme = "README.md"
 
+[features]
+default = []
+enable-quote-to_tokens = ["proc-macro2", "quote"]
+
 [dependencies]
 golang-type-name = { version = "0.0", path = "../../golang-type-name" }
 golang-struct-tag = { version = "0.0", path = "../../golang-struct-tag" }
@@ -19,7 +23,7 @@ golang-struct-tag = { version = "0.0", path = "../../golang-struct-tag" }
 tree-sitter = { version = "0.17", default-features = false }
 tree-sitter-go = { version = "0.16", default-features = false } 
 
-proc-macro2 = { version = "1.0", default-features = false }
-quote = { version = "1.0", default-features = false }
-
 thiserror = { version = "1.0", default-features = false }
+
+proc-macro2 = { version = "1.0", default-features = false, optional = true }
+quote = { version = "1.0", default-features = false, optional = true }

@@ -3,8 +3,6 @@ pub use golang_type_name::{self, TypeName, TypeNameParseError};
 
 use std::str::{self, FromStr};
 
-use proc_macro2::TokenStream;
-use quote::{quote, ToTokens, TokenStreamExt as _};
 use tree_sitter::Node;
 
 pub mod array_type;
@@ -154,35 +152,43 @@ impl Type {
     }
 }
 
-impl ToTokens for Type {
-    fn to_tokens(&self, tokens: &mut TokenStream) {
-        match self {
-            //
-            Self::TypeName(type_name) => tokens.append_all(quote!(#type_name)),
-            //
-            Self::ArrayType(array_type) => tokens.append_all(quote!(#array_type)),
-            Self::StructType(_) => {
-                let err = "impl ToTokens for StructType is unsupported";
-                tokens.append_all(quote!(compile_error!(#err)))
-            }
-            Self::PointerType(pointer_type) => tokens.append_all(quote!(#pointer_type)),
-            Self::FunctionType(_) => {
-                let err = "impl ToTokens for FunctionType is unsupported";
-                tokens.append_all(quote!(compile_error!(#err)))
-            }
-            Self::InterfaceType(_) => {
-                let err = "impl ToTokens for InterfaceType is unsupported";
-                tokens.append_all(quote!(compile_error!(#err)))
-            }
-            Self::SliceType(slice_type) => tokens.append_all(quote!(#slice_type)),
-            Self::MapType(map_type) => tokens.append_all(quote!(#map_type)),
-            Self::ChannelType(_) => {
-                let err = "impl ToTokens for ChannelType is unsupported";
-                tokens.append_all(quote!(compile_error!(#err)))
-            }
-            //
-            Self::ParenthesizedType(parenthesized_type) => {
-                tokens.append_all(quote!(#parenthesized_type))
+#[cfg(feature = "enable-quote-to_tokens")]
+mod enable_quote_to_tokens {
+    use super::Type;
+
+    use proc_macro2::TokenStream;
+    use quote::{quote, ToTokens, TokenStreamExt as _};
+
+    impl ToTokens for Type {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
+            match self {
+                //
+                Self::TypeName(type_name) => tokens.append_all(quote!(#type_name)),
+                //
+                Self::ArrayType(array_type) => tokens.append_all(quote!(#array_type)),
+                Self::StructType(_) => {
+                    let err = "impl ToTokens for StructType is unsupported";
+                    tokens.append_all(quote!(compile_error!(#err)))
+                }
+                Self::PointerType(pointer_type) => tokens.append_all(quote!(#pointer_type)),
+                Self::FunctionType(_) => {
+                    let err = "impl ToTokens for FunctionType is unsupported";
+                    tokens.append_all(quote!(compile_error!(#err)))
+                }
+                Self::InterfaceType(_) => {
+                    let err = "impl ToTokens for InterfaceType is unsupported";
+                    tokens.append_all(quote!(compile_error!(#err)))
+                }
+                Self::SliceType(slice_type) => tokens.append_all(quote!(#slice_type)),
+                Self::MapType(map_type) => tokens.append_all(quote!(#map_type)),
+                Self::ChannelType(_) => {
+                    let err = "impl ToTokens for ChannelType is unsupported";
+                    tokens.append_all(quote!(compile_error!(#err)))
+                }
+                //
+                Self::ParenthesizedType(parenthesized_type) => {
+                    tokens.append_all(quote!(#parenthesized_type))
+                }
             }
         }
     }

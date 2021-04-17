@@ -1,5 +1,3 @@
-use proc_macro2::TokenStream;
-use quote::{quote, ToTokens, TokenStreamExt as _};
 use tree_sitter::Node;
 
 use crate::{Type, TypeParseError};
@@ -29,9 +27,17 @@ impl PointerType {
     }
 }
 
-impl ToTokens for PointerType {
-    fn to_tokens(&self, tokens: &mut TokenStream) {
-        let element = &self.0;
-        tokens.append_all(quote!(#element));
+#[cfg(feature = "enable-quote-to_tokens")]
+mod enable_quote_to_tokens {
+    use super::PointerType;
+
+    use proc_macro2::TokenStream;
+    use quote::{quote, ToTokens, TokenStreamExt as _};
+
+    impl ToTokens for PointerType {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
+            let element = &self.0;
+            tokens.append_all(quote!(#element));
+        }
     }
 }

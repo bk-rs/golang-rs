@@ -1,5 +1,3 @@
-use proc_macro2::{Punct, Spacing, TokenStream};
-use quote::{quote, ToTokens, TokenStreamExt as _};
 use tree_sitter::Node;
 
 use crate::{Type, TypeParseError};
@@ -34,15 +32,23 @@ impl MapType {
     }
 }
 
-impl ToTokens for MapType {
-    fn to_tokens(&self, tokens: &mut TokenStream) {
-        tokens.append_all(quote!(::std::collections::HashMap));
-        tokens.append(Punct::new('<', Spacing::Alone));
-        let key = &self.key;
-        tokens.append_all(quote!(#key));
-        tokens.append(Punct::new(',', Spacing::Alone));
-        let value = &self.value;
-        tokens.append_all(quote!(#value));
-        tokens.append(Punct::new('>', Spacing::Alone));
+#[cfg(feature = "enable-quote-to_tokens")]
+mod enable_quote_to_tokens {
+    use super::MapType;
+
+    use proc_macro2::{Punct, Spacing, TokenStream};
+    use quote::{quote, ToTokens, TokenStreamExt as _};
+
+    impl ToTokens for MapType {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
+            tokens.append_all(quote!(::std::collections::HashMap));
+            tokens.append(Punct::new('<', Spacing::Alone));
+            let key = &self.key;
+            tokens.append_all(quote!(#key));
+            tokens.append(Punct::new(',', Spacing::Alone));
+            let value = &self.value;
+            tokens.append_all(quote!(#value));
+            tokens.append(Punct::new('>', Spacing::Alone));
+        }
     }
 }
