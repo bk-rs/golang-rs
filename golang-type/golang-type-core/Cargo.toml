@@ -12,6 +12,9 @@ keywords = []
 categories = []
 readme = "README.md"
 
+[package.metadata.docs.rs]
+features = ["enable-quote-to_tokens"]
+
 [features]
 default = []
 enable-quote-to_tokens = ["proc-macro2", "quote"]
