@@ -1,7 +1,7 @@
 use std::{error, fs, path::PathBuf};
 
 use golang_type_decl::{
-    golang_type::{PointerType, StructField, StructType, Type, TypeName},
+    golang_type_core::{PointerType, StructField, StructType, Type, TypeName},
     TypeDecl, TypeDef, TypeSpec,
 };
 

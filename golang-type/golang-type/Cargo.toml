@@ -1,0 +1,21 @@
+[package]
+name = "golang-type"
+version = "0.0.0"
+authors = ["vkill <vkill.net@gmail.com>"]
+edition = "2018"
+description = "Golang Type"
+license = "Apache-2.0 OR MIT"
+repository = "https://github.com/bk-rs/golang-rs"
+homepage = "https://github.com/bk-rs/golang-rs"
+documentation = "https://docs.rs/golang-type"
+keywords = []
+categories = []
+readme = "README.md"
+
+[features]
+default = []
+with-macro = ["golang-type-macro"]
+
+[dependencies]
+golang-type-core = { version = "0.0", path = "../golang-type-core" }
+golang-type-macro = { version = "0.0", path = "../golang-type-macro", optional = true }

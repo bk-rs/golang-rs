@@ -1,20 +1,20 @@
 [package]
-name = "golang-type"
+name = "golang-type-core"
 version = "0.0.0"
 authors = ["vkill <vkill.net@gmail.com>"]
 edition = "2018"
-description = "Golang Type"
+description = "Golang Type Core"
 license = "Apache-2.0 OR MIT"
 repository = "https://github.com/bk-rs/golang-rs"
 homepage = "https://github.com/bk-rs/golang-rs"
-documentation = "https://docs.rs/golang-type"
+documentation = "https://docs.rs/golang-type-core"
 keywords = []
 categories = []
 readme = "README.md"
 
 [dependencies]
-golang-type-name = { version = "0.0", path = "../golang-type-name" }
-golang-struct-tag = { version = "0.0", path = "../golang-struct-tag" }
+golang-type-name = { version = "0.0", path = "../../golang-type-name" }
+golang-struct-tag = { version = "0.0", path = "../../golang-struct-tag" }
 
 tree-sitter = { version = "0.17", default-features = false }
 tree-sitter-go = { version = "0.16", default-features = false } 

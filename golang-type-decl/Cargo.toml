@@ -13,7 +13,7 @@ categories = []
 readme = "README.md"
 
 [dependencies]
-golang-type = { version = "0.0", path = "../golang-type" }
+golang-type-core = { version = "0.0", path = "../golang-type/golang-type-core" }
 
 golang-parser = { version = "0.0", path = "../golang-parser" }
 

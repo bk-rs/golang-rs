@@ -1,6 +1,6 @@
 extern crate proc_macro;
 
-use golang_type::{Type, TypeParseError};
+use golang_type_core::{Type, TypeParseError};
 use quote::quote;
 use syn::{
     parse::{Parse, ParseStream},

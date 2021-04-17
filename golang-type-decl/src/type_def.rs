@@ -1,7 +1,7 @@
 use std::str;
 
 use golang_parser::tree_sitter::Node;
-use golang_type::{Type, TypeParseError};
+use golang_type_core::{Type, TypeParseError};
 
 #[derive(PartialEq, Eq, Debug, Clone)]
 pub struct TypeDef {

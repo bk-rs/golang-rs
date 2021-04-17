@@ -1,6 +1,6 @@
 use std::{error, fs, path::PathBuf};
 
-use golang_type::{
+use golang_type_core::{
     golang_struct_tag::{ConventionStructTag, StructTag},
     golang_type_name::TypeName,
     FunctionType, PointerType, SliceType, StructField, StructType, StructTypeParseError, Type,

@@ -1,4 +1,4 @@
-pub use golang_type;
+pub use golang_type_core;
 
 use std::str::FromStr;
 
