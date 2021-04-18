@@ -1,7 +1,7 @@
 use std::str::{self, FromStr};
 
+use golang_parser::{tree_sitter::Node, Parser};
 use pest::{iterators::Pairs, Parser as _};
-use tree_sitter::Node;
 
 // https://github.com/pest-parser/pest/issues/490#issuecomment-808942497
 #[allow(clippy::upper_case_acronyms)]
@@ -28,14 +28,14 @@ pub enum ConventionStructTag {
 
 #[derive(thiserror::Error, Debug)]
 pub enum StructTagParseError {
-    #[error("TreeSitterLanguageError {0}")]
-    TreeSitterLanguageError(String),
-    #[error("TreeSitterParseFailed {0}")]
-    TreeSitterParseFailed(String),
+    #[error("GolangParserError {0:?}")]
+    GolangParserError(#[from] golang_parser::Error),
+    #[error("NodeMissing {0}")]
+    NodeMissing(String),
+    #[error("NodeKindUnknown {0}")]
+    NodeKindUnknown(String),
     #[error("Utf8Error {0:?}")]
     Utf8Error(str::Utf8Error),
-    #[error("UnsupportedType {0}")]
-    UnsupportedType(String),
     #[error("Unknown")]
     Unknown,
 }
@@ -44,65 +44,42 @@ impl FromStr for StructTag {
     type Err = StructTagParseError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let mut parser = tree_sitter::Parser::new();
-        parser
-            .set_language(tree_sitter_go::language())
-            .map_err(|err| StructTagParseError::TreeSitterLanguageError(err.to_string()))?;
+        let parser = Parser::new(format!("type _ struct {{ string {} }};", s))?;
+        let source = parser.get_source();
+        let root_node = parser.get_root_node();
 
-        let code = format!("type _ struct {{ string {} }};", s);
+        let mut cursor = root_node.walk();
 
-        let tree = parser.parse(&code, None).ok_or_else(|| {
-            StructTagParseError::TreeSitterParseFailed("Not found tree".to_string())
-        })?;
-        let mut tree_cursor = tree.walk();
-        let source = code.as_bytes();
-        let node_source_file = tree.root_node();
-
-        let node_type_declaration = node_source_file
-            .named_children(&mut tree_cursor)
+        let node_type_declaration = root_node
+            .named_children(&mut cursor)
             .find(|node| node.kind() == "type_declaration")
-            .ok_or_else(|| {
-                StructTagParseError::TreeSitterParseFailed("Not found type_declaration".to_string())
-            })?;
+            .ok_or_else(|| StructTagParseError::NodeMissing("type_declaration".to_string()))?;
         let node_type_spec = node_type_declaration
-            .named_children(&mut tree_cursor)
+            .named_children(&mut cursor)
             .find(|node| node.kind() == "type_spec")
-            .ok_or_else(|| {
-                StructTagParseError::TreeSitterParseFailed("Not found type_spec".to_string())
-            })?;
-        let _ = node_type_spec.named_child(0).ok_or_else(|| {
-            StructTagParseError::TreeSitterParseFailed("Not found type_spec name".to_string())
-        })?;
-        let node_struct_type = node_type_spec.named_child(1).ok_or_else(|| {
-            StructTagParseError::TreeSitterParseFailed("Not found type_spec type".to_string())
-        })?;
+            .ok_or_else(|| StructTagParseError::NodeMissing("type_spec".to_string()))?;
+        let _ = node_type_spec
+            .named_child(0)
+            .ok_or_else(|| StructTagParseError::NodeMissing("type_spec name".to_string()))?;
+        let node_struct_type = node_type_spec
+            .named_child(1)
+            .ok_or_else(|| StructTagParseError::NodeMissing("type_spec type".to_string()))?;
         let node_field_declaration_list = node_struct_type
-            .named_children(&mut tree_cursor)
+            .named_children(&mut cursor)
             .find(|node| node.kind() == "field_declaration_list")
             .ok_or_else(|| {
-                StructTagParseError::TreeSitterParseFailed(
-                    "Not found field_declaration_list".to_string(),
-                )
+                StructTagParseError::NodeMissing("field_declaration_list".to_string())
             })?;
         let node_field_declaration = node_field_declaration_list
-            .named_children(&mut tree_cursor)
+            .named_children(&mut cursor)
             .find(|node| node.kind() == "field_declaration")
-            .ok_or_else(|| {
-                StructTagParseError::TreeSitterParseFailed(
-                    "Not found field_declaration".to_string(),
-                )
-            })?;
+            .ok_or_else(|| StructTagParseError::NodeMissing("field_declaration".to_string()))?;
         let _ = node_field_declaration.named_child(0).ok_or_else(|| {
-            StructTagParseError::TreeSitterParseFailed(
-                "Not found field_declaration type".to_string(),
-            )
+            StructTagParseError::NodeMissing("field_declaration type".to_string())
         })?;
-        let node_field_declaration_tag =
-            node_field_declaration.named_child(1).ok_or_else(|| {
-                StructTagParseError::TreeSitterParseFailed(
-                    "Not found field_declaration tag".to_string(),
-                )
-            })?;
+        let node_field_declaration_tag = node_field_declaration
+            .named_child(1)
+            .ok_or_else(|| StructTagParseError::NodeMissing("field_declaration tag".to_string()))?;
 
         match node_field_declaration_tag.kind() {
             "raw_string_literal" => {
@@ -111,7 +88,7 @@ impl FromStr for StructTag {
             "interpreted_string_literal" => {
                 Self::from_interpreted_string_literal_node(node_field_declaration_tag, source)
             }
-            _ => Err(StructTagParseError::UnsupportedType(
+            _ => Err(StructTagParseError::NodeKindUnknown(
                 node_field_declaration_tag.kind().to_owned(),
             )),
         }
