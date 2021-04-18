@@ -1,0 +1,23 @@
+[package]
+name = "golang-type-decl-macro"
+version = "0.0.0"
+authors = ["vkill <vkill.net@gmail.com>"]
+edition = "2018"
+description = "Golang Type Decl Macro"
+license = "Apache-2.0 OR MIT"
+repository = "https://github.com/bk-rs/golang-rs"
+homepage = "https://github.com/bk-rs/golang-rs"
+documentation = "https://docs.rs/golang-type-decl-macro"
+keywords = []
+categories = []
+readme = "README.md"
+
+[lib]
+proc-macro = true
+
+[dependencies]
+golang-type-decl-core = { version = "0.0", path = "../golang-type-decl-core" }
+
+proc-macro2 = { version = "1.0", default-features = false }
+quote = { version = "1.0", default-features = false }
+syn = { version = "1.0", default-features = false, features = ["parsing"] }

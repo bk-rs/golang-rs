@@ -1,6 +1,6 @@
 use std::{error, fs, path::PathBuf};
 
-use golang_type_decl::{
+use golang_type_decl_core::{
     golang_type_core::{PointerType, SliceType, Type, TypeName},
     AliasDecl, TypeDecl, TypeSpec,
 };

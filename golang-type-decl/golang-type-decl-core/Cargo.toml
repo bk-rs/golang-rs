@@ -1,20 +1,20 @@
 [package]
-name = "golang-type-decl"
+name = "golang-type-decl-core"
 version = "0.0.0"
 authors = ["vkill <vkill.net@gmail.com>"]
 edition = "2018"
-description = "Golang Type Decl"
+description = "Golang Type Decl core"
 license = "Apache-2.0 OR MIT"
 repository = "https://github.com/bk-rs/golang-rs"
 homepage = "https://github.com/bk-rs/golang-rs"
-documentation = "https://docs.rs/golang-type-decl"
+documentation = "https://docs.rs/golang-type-decl-core"
 keywords = []
 categories = []
 readme = "README.md"
 
 [dependencies]
-golang-type-core = { version = "0.0", path = "../golang-type/golang-type-core" }
+golang-type-core = { version = "0.0", path = "../../golang-type/golang-type-core" }
 
-golang-parser = { version = "0.0", path = "../golang-parser" }
+golang-parser = { version = "0.0", path = "../../golang-parser" }
 
 thiserror = { version = "1.0", default-features = false }
