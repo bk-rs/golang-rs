@@ -1,11 +1,12 @@
-use convert_case::{Case, Casing as _};
 use golang_type_decl_core::{golang_type_core::Type, TypeDecl, TypeSpec};
 use proc_macro2::TokenStream;
-use quote::{format_ident, quote};
+use quote::quote;
 
 mod input;
+mod output;
 
 pub use self::input::Input;
+use self::output::Output;
 
 pub fn get_output(input: Input) -> TokenStream {
     let type_decl = match input.code.parse::<TypeDecl>() {
@@ -37,26 +38,10 @@ pub fn get_output(input: Input) -> TokenStream {
         }
     };
 
-    let struct_name = format_ident!("{}", name.to_case(Case::Snake));
-    let struct_fields: Vec<_> = struct_type
-        .fields
-        .iter()
-        .map(|field| {
-            let field_name_serde_rename = &field.name;
-            let field_name = format_ident!("{}", field.name.to_case(Case::Snake));
-            let field_type = field.r#type.to_owned();
+    let output = Output {
+        name: name.to_owned(),
+        struct_type: struct_type.to_owned(),
+    };
 
-            quote! {
-                #[serde(rename = #field_name_serde_rename)]
-                pub #field_name: #field_type,
-            }
-        })
-        .collect();
-
-    quote! {
-        #[derive(::serde::Deserialize, Debug, Clone)]
-        pub struct #struct_name {
-            #(#struct_fields)*
-        }
-    }
+    quote!(#output)
 }
