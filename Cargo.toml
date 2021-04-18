@@ -7,7 +7,8 @@ members = [
     "golang-type/golang-type-core",
     "golang-type/golang-type-macro",
     "golang-type-decl",
-    "golang-type-name",
-    "golang-type-name-test",
+    "golang-type-name/golang-type-name",
+    "golang-type-name/golang-type-name-core",
+    "golang-type-name/golang-type-name-macro",
     "golang-var-decl",
 ]

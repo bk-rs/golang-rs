@@ -1,6 +1,8 @@
 use std::{error, fs, path::PathBuf};
 
-use golang_type_core::{golang_type_name::TypeName, ArrayLength, ArrayType, PointerType, Type};
+use golang_type_core::{
+    golang_type_name_core::TypeName, ArrayLength, ArrayType, PointerType, Type,
+};
 
 #[test]
 fn test_parse() -> Result<(), Box<dyn error::Error>> {

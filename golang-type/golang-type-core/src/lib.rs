@@ -1,5 +1,5 @@
 pub use golang_struct_tag;
-pub use golang_type_name::{self, TypeName, TypeNameParseError};
+pub use golang_type_name_core::{self, TypeName, TypeNameParseError};
 
 use std::str::{self, FromStr};
 

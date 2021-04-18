@@ -1,0 +1,23 @@
+[package]
+name = "golang-type-name-macro"
+version = "0.0.0"
+authors = ["vkill <vkill.net@gmail.com>"]
+edition = "2018"
+description = "Golang TypeName Macro"
+license = "Apache-2.0 OR MIT"
+repository = "https://github.com/bk-rs/golang-rs"
+homepage = "https://github.com/bk-rs/golang-rs"
+documentation = "https://docs.rs/golang-type-name-macro"
+keywords = []
+categories = []
+readme = "README.md"
+
+[lib]
+proc-macro = true
+
+[dependencies]
+golang-type-name-core = { version = "0.0", features = ["enable-quote-to_tokens"], path = "../golang-type-name-core" }
+
+proc-macro2 = { version = "1.0", default-features = false }
+quote = { version = "1.0", default-features = false }
+syn = { version = "1.0", default-features = false, features = ["parsing"] }

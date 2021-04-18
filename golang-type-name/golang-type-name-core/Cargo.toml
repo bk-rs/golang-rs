@@ -1,13 +1,13 @@
 [package]
-name = "golang-type-core"
+name = "golang-type-name-core"
 version = "0.0.0"
 authors = ["vkill <vkill.net@gmail.com>"]
 edition = "2018"
-description = "Golang Type Core"
+description = "Golang TypeName Core"
 license = "Apache-2.0 OR MIT"
 repository = "https://github.com/bk-rs/golang-rs"
 homepage = "https://github.com/bk-rs/golang-rs"
-documentation = "https://docs.rs/golang-type-core"
+documentation = "https://docs.rs/golang-type-name-core"
 keywords = []
 categories = []
 readme = "README.md"
@@ -20,8 +20,6 @@ default = []
 enable-quote-to_tokens = ["proc-macro2", "quote"]
 
 [dependencies]
-golang-type-name-core = { version = "0.0", features = ["enable-quote-to_tokens"], path = "../../golang-type-name/golang-type-name-core" }
-golang-struct-tag = { version = "0.0", path = "../../golang-struct-tag" }
 golang-parser = { version = "0.0", path = "../../golang-parser" }
 
 thiserror = { version = "1.0", default-features = false }

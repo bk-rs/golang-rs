@@ -3,7 +3,7 @@ use std::str;
 use golang_parser::tree_sitter::Node;
 use golang_struct_tag::{StructTag, StructTagParseError};
 
-use crate::{golang_type_name::TypeName, PointerType, Type, TypeParseError};
+use crate::{golang_type_name_core::TypeName, PointerType, Type, TypeParseError};
 
 #[derive(PartialEq, Eq, Debug, Clone)]
 pub struct StructType {

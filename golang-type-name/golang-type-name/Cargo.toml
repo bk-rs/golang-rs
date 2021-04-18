@@ -13,10 +13,8 @@ categories = []
 readme = "README.md"
 
 [dependencies]
-tree-sitter = { version = "0.17", default-features = false }
-tree-sitter-go = { version = "0.16", default-features = false } 
+golang-type-name-core = { version = "0.0", path = "../golang-type-name-core" }
+golang-type-name-macro = { version = "0.0", path = "../golang-type-name-macro" }
 
-proc-macro2 = { version = "1.0", default-features = false }
-quote = { version = "1.0", default-features = false }
-
-thiserror = { version = "1.0", default-features = false }
+[dev-dependencies]
+num-complex = { version = "0.4", default-features = false }
