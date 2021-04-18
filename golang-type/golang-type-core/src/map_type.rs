@@ -1,4 +1,4 @@
-use tree_sitter::Node;
+use golang_parser::tree_sitter::Node;
 
 use crate::{Type, TypeParseError};
 
@@ -10,17 +10,17 @@ pub struct MapType {
 
 #[derive(thiserror::Error, Debug)]
 pub enum MapTypeParseError {
-    #[error("TreeSitterParseFailed {0}")]
-    TreeSitterParseFailed(String),
+    #[error("NodeMissing {0}")]
+    NodeMissing(String),
 }
 impl MapType {
     pub(crate) fn from_map_type_node(node: Node, source: &[u8]) -> Result<Self, TypeParseError> {
-        let node_map_type_key = node.named_child(0).ok_or_else(|| {
-            MapTypeParseError::TreeSitterParseFailed("Not found map_type key".to_string())
-        })?;
-        let node_map_type_value = node.named_child(1).ok_or_else(|| {
-            MapTypeParseError::TreeSitterParseFailed("Not found map_type value".to_string())
-        })?;
+        let node_map_type_key = node
+            .named_child(0)
+            .ok_or_else(|| MapTypeParseError::NodeMissing("map_type key".to_string()))?;
+        let node_map_type_value = node
+            .named_child(1)
+            .ok_or_else(|| MapTypeParseError::NodeMissing("map_type value".to_string()))?;
 
         let key = Type::from_node(node_map_type_key, source)?;
         let value = Type::from_node(node_map_type_value, source)?;

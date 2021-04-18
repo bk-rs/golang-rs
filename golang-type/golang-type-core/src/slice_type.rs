@@ -1,4 +1,4 @@
-use tree_sitter::Node;
+use golang_parser::tree_sitter::Node;
 
 use crate::{Type, TypeParseError};
 
@@ -9,14 +9,14 @@ pub struct SliceType {
 
 #[derive(thiserror::Error, Debug)]
 pub enum SliceTypeParseError {
-    #[error("TreeSitterParseFailed {0}")]
-    TreeSitterParseFailed(String),
+    #[error("NodeMissing {0}")]
+    NodeMissing(String),
 }
 impl SliceType {
     pub(crate) fn from_slice_type_node(node: Node, source: &[u8]) -> Result<Self, TypeParseError> {
-        let node_slice_type_element = node.named_child(0).ok_or_else(|| {
-            SliceTypeParseError::TreeSitterParseFailed("Not found slice_type element".to_string())
-        })?;
+        let node_slice_type_element = node
+            .named_child(0)
+            .ok_or_else(|| SliceTypeParseError::NodeMissing("slice_type element".to_string()))?;
 
         let element = Type::from_node(node_slice_type_element, source)?;
 

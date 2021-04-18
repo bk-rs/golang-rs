@@ -3,7 +3,7 @@ pub use golang_type_name::{self, TypeName, TypeNameParseError};
 
 use std::str::{self, FromStr};
 
-use tree_sitter::Node;
+use golang_parser::{tree_sitter::Node, Parser};
 
 pub mod array_type;
 pub mod channel_type;
@@ -43,12 +43,12 @@ pub enum Type {
 
 #[derive(thiserror::Error, Debug)]
 pub enum TypeParseError {
-    #[error("TreeSitterLanguageError {0}")]
-    TreeSitterLanguageError(String),
-    #[error("TreeSitterParseFailed {0}")]
-    TreeSitterParseFailed(String),
-    #[error("UnsupportedType {0}")]
-    UnsupportedType(String),
+    #[error("GolangParserError {0:?}")]
+    GolangParserError(#[from] golang_parser::Error),
+    #[error("NodeMissing {0}")]
+    NodeMissing(String),
+    #[error("NodeKindUnknown {0}")]
+    NodeKindUnknown(String),
     //
     //
     #[error("TypeNameParseError {0:?}")]
@@ -79,39 +79,26 @@ impl FromStr for Type {
     type Err = TypeParseError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let mut parser = tree_sitter::Parser::new();
-        parser
-            .set_language(tree_sitter_go::language())
-            .map_err(|err| TypeParseError::TreeSitterLanguageError(err.to_string()))?;
+        let parser = Parser::new(format!("var _ {}", s))?;
+        let source = parser.get_source();
+        let root_node = parser.get_root_node();
 
-        let code = format!("var _ {};", s);
-
-        let tree = parser
-            .parse(&code, None)
-            .ok_or_else(|| TypeParseError::TreeSitterParseFailed("Not found tree".to_string()))?;
-        let mut tree_cursor = tree.walk();
-        let source = code.as_bytes();
-        let node_source_file = tree.root_node();
-
-        let node_var_declaration = node_source_file
-            .named_children(&mut tree_cursor)
+        let mut cursor = root_node.walk();
+        let node_var_declaration = root_node
+            .named_children(&mut cursor)
             .find(|node| node.kind() == "var_declaration")
-            .ok_or_else(|| {
-                TypeParseError::TreeSitterParseFailed("Not found var_declaration".to_string())
-            })?;
+            .ok_or_else(|| TypeParseError::NodeMissing("var_declaration".to_string()))?;
         let node_var_spec = node_var_declaration
-            .named_children(&mut tree_cursor)
+            .named_children(&mut cursor)
             .find(|node| node.kind() == "var_spec")
-            .ok_or_else(|| {
-                TypeParseError::TreeSitterParseFailed("Not found var_spec".to_string())
-            })?;
+            .ok_or_else(|| TypeParseError::NodeMissing("var_spec".to_string()))?;
 
-        let _ = node_var_spec.named_child(0).ok_or_else(|| {
-            TypeParseError::TreeSitterParseFailed("Not found var_spec name".to_string())
-        })?;
-        let node_var_spec_type = node_var_spec.named_child(1).ok_or_else(|| {
-            TypeParseError::TreeSitterParseFailed("Not found var_spec type".to_string())
-        })?;
+        let _ = node_var_spec
+            .named_child(0)
+            .ok_or_else(|| TypeParseError::NodeMissing("var_spec name".to_string()))?;
+        let node_var_spec_type = node_var_spec
+            .named_child(1)
+            .ok_or_else(|| TypeParseError::NodeMissing("var_spec type".to_string()))?;
 
         Self::from_node(node_var_spec_type, source)
     }
@@ -147,7 +134,7 @@ impl Type {
             //
             "parenthesized_type" => ParenthesizedType::from_parenthesized_type_node(node, source)
                 .map(Self::ParenthesizedType),
-            _ => Err(TypeParseError::UnsupportedType(node.kind().to_owned())),
+            _ => Err(TypeParseError::NodeKindUnknown(node.kind().to_owned())),
         }
     }
 }

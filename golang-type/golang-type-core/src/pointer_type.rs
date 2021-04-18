@@ -1,4 +1,4 @@
-use tree_sitter::Node;
+use golang_parser::tree_sitter::Node;
 
 use crate::{Type, TypeParseError};
 
@@ -7,8 +7,8 @@ pub struct PointerType(pub Box<Type>);
 
 #[derive(thiserror::Error, Debug)]
 pub enum PointerTypeParseError {
-    #[error("TreeSitterParseFailed {0}")]
-    TreeSitterParseFailed(String),
+    #[error("NodeMissing {0}")]
+    NodeMissing(String),
 }
 impl PointerType {
     pub(crate) fn from_pointer_type_node(
@@ -16,9 +16,7 @@ impl PointerType {
         source: &[u8],
     ) -> Result<Self, TypeParseError> {
         let node_pointer_type_element = node.named_child(0).ok_or_else(|| {
-            PointerTypeParseError::TreeSitterParseFailed(
-                "Not found pointer_type element".to_string(),
-            )
+            PointerTypeParseError::NodeMissing("pointer_type element".to_string())
         })?;
 
         let element = Type::from_node(node_pointer_type_element, source)?;

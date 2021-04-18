@@ -1,7 +1,7 @@
 use std::str;
 
+use golang_parser::tree_sitter::Node;
 use golang_struct_tag::{StructTag, StructTagParseError};
-use tree_sitter::Node;
 
 use crate::{golang_type_name::TypeName, PointerType, Type, TypeParseError};
 
@@ -20,10 +20,10 @@ pub struct StructField {
 
 #[derive(thiserror::Error, Debug)]
 pub enum StructTypeParseError {
-    #[error("TreeSitterParseFailed {0}")]
-    TreeSitterParseFailed(String),
-    #[error("UnsupportedNodeKind {0}")]
-    UnsupportedNodeKind(String),
+    #[error("NodeMissing {0}")]
+    NodeMissing(String),
+    #[error("NodeKindUnknown {0}")]
+    NodeKindUnknown(String),
     #[error("Utf8Error {0:?}")]
     Utf8Error(str::Utf8Error),
     #[error("UnexpectedType {0}")]
@@ -37,15 +37,12 @@ pub enum StructTypeParseError {
 impl StructType {
     pub(crate) fn from_struct_type_node(node: Node, source: &[u8]) -> Result<Self, TypeParseError> {
         let node_field_declaration_list = node.named_child(0).ok_or_else(|| {
-            StructTypeParseError::TreeSitterParseFailed(
-                "Not found field_declaration_list".to_string(),
-            )
+            StructTypeParseError::NodeMissing("field_declaration_list".to_string())
         })?;
         if node_field_declaration_list.kind() != "field_declaration_list" {
-            return Err(StructTypeParseError::TreeSitterParseFailed(
-                "Not found field_declaration_list".to_string(),
-            )
-            .into());
+            return Err(
+                StructTypeParseError::NodeMissing("field_declaration_list".to_string()).into(),
+            );
         }
         let mut tree_cursor = node_field_declaration_list.walk();
 
@@ -57,7 +54,7 @@ impl StructType {
                 "field_declaration" => {}
                 "comment" => continue,
                 _ => {
-                    return Err(StructTypeParseError::UnsupportedNodeKind(
+                    return Err(StructTypeParseError::NodeKindUnknown(
                         node_field_declaration.kind().to_owned(),
                     )
                     .into())
@@ -74,8 +71,8 @@ impl StructType {
             let node_field_declaration_type = loop {
                 let node_field_declaration_name_or_type =
                     node_field_declaration.named_child(i).ok_or_else(|| {
-                        StructTypeParseError::TreeSitterParseFailed(
-                            "Not found field_declaration name or type".to_string(),
+                        StructTypeParseError::NodeMissing(
+                            "field_declaration name or type".to_string(),
                         )
                     })?;
                 i += 1;
@@ -106,7 +103,7 @@ impl StructType {
                         .map_err(StructTypeParseError::StructTagParseError)?,
                     ),
                     _ => {
-                        return Err(StructTypeParseError::UnsupportedNodeKind(
+                        return Err(StructTypeParseError::NodeKindUnknown(
                             node_field_declaration_tag.kind().to_owned(),
                         )
                         .into())

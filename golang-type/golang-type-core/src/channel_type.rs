@@ -1,4 +1,4 @@
-use tree_sitter::Node;
+use golang_parser::tree_sitter::Node;
 
 use crate::TypeParseError;
 
