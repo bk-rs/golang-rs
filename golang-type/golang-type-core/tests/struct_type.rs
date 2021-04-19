@@ -132,20 +132,28 @@ fn test_parse_tag() -> Result<(), Box<dyn error::Error>> {
                         vec!["microsec".to_owned()],
                         Type::TypeName(TypeName::Uint64).into(),
                     ),
-                    tag: Some(StructTag::Convention(vec![ConventionStructTag::Unknown(
-                        "protobuf".to_owned(),
-                        "1".to_owned()
-                    )])),
+                    tag: Some(StructTag::Convention(
+                        vec![ConventionStructTag::Unknown(
+                            "protobuf".to_owned(),
+                            "1".to_owned()
+                        )]
+                        .into_iter()
+                        .collect()
+                    )),
                 },
                 FieldDecl {
                     struct_field: StructField::IdentifierListType(
                         vec!["serverIP6".to_owned()],
                         Type::TypeName(TypeName::Uint64).into(),
                     ),
-                    tag: Some(StructTag::Convention(vec![ConventionStructTag::Unknown(
-                        "protobuf".to_owned(),
-                        "2".to_owned()
-                    )])),
+                    tag: Some(StructTag::Convention(
+                        vec![ConventionStructTag::Unknown(
+                            "protobuf".to_owned(),
+                            "2".to_owned()
+                        )]
+                        .into_iter()
+                        .collect()
+                    )),
                 },
             ]
         })

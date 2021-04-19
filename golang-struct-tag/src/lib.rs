@@ -1,4 +1,9 @@
-use std::str::{self, FromStr};
+use std::{
+    cmp::PartialEq,
+    collections::HashSet,
+    hash::{Hash, Hasher},
+    str::{self, FromStr},
+};
 
 use golang_parser::{tree_sitter::Node, Parser};
 use pest::{iterators::Pairs, Parser as _};
@@ -18,12 +23,29 @@ pub use self::json::{JsonStructTag, JsonStructTagOption};
 pub enum StructTag {
     RawStringLiteral(String),
     InterpretedStringLiteral(String),
-    Convention(Vec<ConventionStructTag>),
+    Convention(HashSet<ConventionStructTag>),
 }
-#[derive(PartialEq, Eq, Debug, Clone)]
+#[derive(Eq, Debug, Clone)]
 pub enum ConventionStructTag {
     Json(JsonStructTag),
     Unknown(String, String),
+}
+impl PartialEq for ConventionStructTag {
+    fn eq(&self, other: &Self) -> bool {
+        match (self, other) {
+            (Self::Json(_), Self::Json(_)) => true,
+            (Self::Unknown(key, _), Self::Unknown(other_key, _)) => key == other_key,
+            _ => false,
+        }
+    }
+}
+impl Hash for ConventionStructTag {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        match self {
+            Self::Json(_) => "json".hash(state),
+            Self::Unknown(key, _) => key.hash(state),
+        }
+    }
 }
 
 #[derive(thiserror::Error, Debug)]
@@ -105,7 +127,8 @@ impl StructTag {
             .map_err(StructTagParseError::Utf8Error)?;
 
         match ConventionStructTagParser::parse(Rule::tag, s) {
-            Ok(pairs) => ConventionStructTag::from_pairs(pairs).map(Self::Convention),
+            Ok(pairs) => ConventionStructTag::from_pairs(pairs)
+                .map(|x| Self::Convention(x.into_iter().collect())),
             Err(_) => Ok(Self::RawStringLiteral(s.to_owned())),
         }
     }
@@ -177,10 +200,14 @@ mod tests {
         );
 
         assert_eq!(
-            StructTag::Convention(vec![ConventionStructTag::Unknown(
-                "foo".to_owned(),
-                "bar".to_owned()
-            )]),
+            StructTag::Convention(
+                vec![ConventionStructTag::Unknown(
+                    "foo".to_owned(),
+                    "bar".to_owned()
+                )]
+                .into_iter()
+                .collect()
+            ),
             r#"`foo:"bar"`"#.parse()?
         );
 
