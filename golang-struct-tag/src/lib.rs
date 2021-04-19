@@ -48,13 +48,13 @@ impl Hash for ConventionStructTag {
     }
 }
 impl StructTag {
-    pub fn json_struct_tag(&self) -> Option<JsonStructTag> {
+    pub fn as_json_struct_tag(&self) -> Option<&JsonStructTag> {
         match self {
             Self::Convention(set) => match set
                 .iter()
                 .find(|x| x == &&ConventionStructTag::Json(JsonStructTag::Ignored))
             {
-                Some(ConventionStructTag::Json(x)) => Some(x.to_owned()),
+                Some(ConventionStructTag::Json(x)) => Some(x),
                 _ => None,
             },
             _ => None,
@@ -236,8 +236,8 @@ mod tests {
                     .into_iter()
                     .collect(),
             )
-            .json_struct_tag(),
-            Some(JsonStructTag::Ignored)
+            .as_json_struct_tag(),
+            Some(&JsonStructTag::Ignored)
         );
 
         assert_eq!(
@@ -249,8 +249,8 @@ mod tests {
                 .into_iter()
                 .collect(),
             )
-            .json_struct_tag(),
-            Some(JsonStructTag::Normal(Some("foo".to_owned()), vec![]))
+            .as_json_struct_tag(),
+            Some(&JsonStructTag::Normal(Some("foo".to_owned()), vec![]))
         );
 
         assert_eq!(
@@ -262,7 +262,7 @@ mod tests {
                 .into_iter()
                 .collect(),
             )
-            .json_struct_tag(),
+            .as_json_struct_tag(),
             None
         );
     }
