@@ -47,6 +47,20 @@ impl Hash for ConventionStructTag {
         }
     }
 }
+impl StructTag {
+    pub fn json_struct_tag(&self) -> Option<JsonStructTag> {
+        match self {
+            Self::Convention(set) => match set
+                .iter()
+                .find(|x| x == &&ConventionStructTag::Json(JsonStructTag::Ignored))
+            {
+                Some(ConventionStructTag::Json(x)) => Some(x.to_owned()),
+                _ => None,
+            },
+            _ => None,
+        }
+    }
+}
 
 #[derive(thiserror::Error, Debug)]
 pub enum StructTagParseError {
@@ -212,5 +226,44 @@ mod tests {
         );
 
         Ok(())
+    }
+
+    #[test]
+    fn test_json_struct_tag() {
+        assert_eq!(
+            StructTag::Convention(
+                vec![ConventionStructTag::Json(JsonStructTag::Ignored)]
+                    .into_iter()
+                    .collect(),
+            )
+            .json_struct_tag(),
+            Some(JsonStructTag::Ignored)
+        );
+
+        assert_eq!(
+            StructTag::Convention(
+                vec![ConventionStructTag::Json(JsonStructTag::Normal(
+                    Some("foo".to_owned()),
+                    vec![]
+                ))]
+                .into_iter()
+                .collect(),
+            )
+            .json_struct_tag(),
+            Some(JsonStructTag::Normal(Some("foo".to_owned()), vec![]))
+        );
+
+        assert_eq!(
+            StructTag::Convention(
+                vec![ConventionStructTag::Unknown(
+                    "foo".to_owned(),
+                    "bar".to_owned(),
+                )]
+                .into_iter()
+                .collect(),
+            )
+            .json_struct_tag(),
+            None
+        );
     }
 }
