@@ -1,7 +1,7 @@
 use std::{error, fs, path::PathBuf};
 
 use golang_type_decl_core::{
-    golang_type_core::{PointerType, StructField, StructType, Type, TypeName},
+    golang_type_core::{FieldDecl, PointerType, StructField, StructType, Type, TypeName},
     TypeDecl, TypeDef, TypeSpec,
 };
 
@@ -20,33 +20,27 @@ fn test_parse_single() -> Result<(), Box<dyn error::Error>> {
             type_specs: vec![TypeSpec::TypeDef(TypeDef {
                 name: "TreeNode".to_owned(),
                 r#type: Type::StructType(StructType {
-                    fields: vec![
-                        StructField {
-                            name: "left".to_owned(),
-                            r#type: Type::PointerType(PointerType(
-                                Type::TypeName(TypeName::Identifier("TreeNode".to_owned())).into()
-                            ))
-                            .into(),
-                            is_embedded: false,
+                    field_decls: vec![
+                        FieldDecl {
+                            struct_field: StructField::IdentifierListType(
+                                vec!["left".to_owned(), "right".to_owned()],
+                                Type::PointerType(PointerType(
+                                    Type::TypeName(TypeName::Identifier("TreeNode".to_owned()))
+                                        .into()
+                                ))
+                                .into()
+                            ),
                             tag: None,
                         },
-                        StructField {
-                            name: "right".to_owned(),
-                            r#type: Type::PointerType(PointerType(
-                                Type::TypeName(TypeName::Identifier("TreeNode".to_owned())).into()
-                            ))
-                            .into(),
-                            is_embedded: false,
-                            tag: None,
-                        },
-                        StructField {
-                            name: "value".to_owned(),
-                            r#type: Type::PointerType(PointerType(
-                                Type::TypeName(TypeName::Identifier("Comparable".to_owned()))
-                                    .into()
-                            ))
-                            .into(),
-                            is_embedded: false,
+                        FieldDecl {
+                            struct_field: StructField::IdentifierListType(
+                                vec!["value".to_owned()],
+                                Type::PointerType(PointerType(
+                                    Type::TypeName(TypeName::Identifier("Comparable".to_owned()))
+                                        .into()
+                                ))
+                                .into()
+                            ),
                             tag: None,
                         },
                     ]
@@ -75,20 +69,13 @@ fn test_parse_multi() -> Result<(), Box<dyn error::Error>> {
                 TypeSpec::TypeDef(TypeDef {
                     name: "Point".to_owned(),
                     r#type: Type::StructType(StructType {
-                        fields: vec![
-                            StructField {
-                                name: "x".to_owned(),
-                                r#type: Type::TypeName(TypeName::Float64).into(),
-                                is_embedded: false,
-                                tag: None,
-                            },
-                            StructField {
-                                name: "y".to_owned(),
-                                r#type: Type::TypeName(TypeName::Float64).into(),
-                                is_embedded: false,
-                                tag: None,
-                            },
-                        ]
+                        field_decls: vec![FieldDecl {
+                            struct_field: StructField::IdentifierListType(
+                                vec!["x".to_owned(), "y".to_owned()],
+                                Type::TypeName(TypeName::Float64).into(),
+                            ),
+                            tag: None,
+                        },]
                     })
                 }),
                 TypeSpec::TypeDef(TypeDef {

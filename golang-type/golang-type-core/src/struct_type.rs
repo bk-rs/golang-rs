@@ -7,15 +7,41 @@ use crate::{golang_type_name_core::TypeName, PointerType, Type, TypeParseError};
 
 #[derive(PartialEq, Eq, Debug, Clone)]
 pub struct StructType {
-    pub fields: Vec<StructField>,
+    pub field_decls: Vec<FieldDecl>,
 }
 
 #[derive(PartialEq, Eq, Debug, Clone)]
-pub struct StructField {
-    pub name: String,
-    pub r#type: Box<Type>,
-    pub is_embedded: bool,
+pub struct FieldDecl {
+    pub struct_field: StructField,
     pub tag: Option<StructTag>,
+}
+
+#[derive(PartialEq, Eq, Debug, Clone)]
+pub enum StructField {
+    IdentifierListType(Vec<String>, Box<Type>),
+    EmbeddedField(EmbeddedField),
+}
+
+#[derive(PartialEq, Eq, Debug, Clone)]
+pub enum EmbeddedField {
+    TypeName(TypeName),
+    PointerType(TypeName),
+}
+impl EmbeddedField {
+    pub fn name(&self) -> String {
+        match self {
+            Self::TypeName(type_name) | Self::PointerType(type_name) => {
+                TypeNameWrapper(type_name).struct_field_name()
+            }
+        }
+    }
+    pub fn r#type(&self) -> Type {
+        match self {
+            Self::TypeName(type_name) | Self::PointerType(type_name) => {
+                Type::TypeName(type_name.to_owned())
+            }
+        }
+    }
 }
 
 #[derive(thiserror::Error, Debug)]
@@ -46,8 +72,8 @@ impl StructType {
         }
         let mut tree_cursor = node_field_declaration_list.walk();
 
-        let mut fields = vec![];
-        let mut field_names = vec![];
+        let mut field_decls = vec![];
+        let mut non_blank_field_names = vec![];
 
         for node_field_declaration in node_field_declaration_list.named_children(&mut tree_cursor) {
             match node_field_declaration.kind() {
@@ -114,12 +140,12 @@ impl StructType {
             };
 
             if node_field_declaration_names.is_empty() {
-                let name = match &r#type {
-                    Type::TypeName(type_name) => TypeNameWrapper(type_name).struct_field_name(),
+                let embedded_field = match &r#type {
+                    Type::TypeName(type_name) => EmbeddedField::TypeName(type_name.to_owned()),
                     Type::PointerType(PointerType(pointer_type_element)) => {
                         match **pointer_type_element {
                             Type::TypeName(ref type_name) => {
-                                TypeNameWrapper(type_name).struct_field_name()
+                                EmbeddedField::PointerType(type_name.to_owned())
                             }
                             _ => {
                                 return Err(StructTypeParseError::UnexpectedType(format!(
@@ -139,53 +165,57 @@ impl StructType {
                     }
                 };
 
-                if field_names.contains(&name) {
+                if non_blank_field_names.contains(&embedded_field.name()) {
                     return Err(StructTypeParseError::DuplicateField(format!(
                         "duplicate field {}",
-                        name
+                        &embedded_field.name()
                     ))
                     .into());
                 }
-                field_names.push(name.to_owned());
+                non_blank_field_names.push(embedded_field.name().to_owned());
 
-                let field = StructField {
-                    name,
-                    r#type: r#type.into(),
+                let field_decl = FieldDecl {
+                    struct_field: StructField::EmbeddedField(embedded_field),
                     tag,
-                    is_embedded: true,
                 };
-                fields.push(field);
+                field_decls.push(field_decl);
             } else {
+                let mut names = vec![];
                 for node_field_declaration_name in node_field_declaration_names {
                     let name = node_field_declaration_name
                         .utf8_text(source)
                         .map_err(StructTypeParseError::Utf8Error)?
                         .to_owned();
 
-                    if field_names.contains(&name) {
-                        return Err(StructTypeParseError::DuplicateField(format!(
-                            "duplicate field {}",
-                            name
-                        ))
-                        .into());
+                    if name != "_" {
+                        if non_blank_field_names.contains(&name) {
+                            return Err(StructTypeParseError::DuplicateField(format!(
+                                "duplicate field {}",
+                                name
+                            ))
+                            .into());
+                        }
+                        non_blank_field_names.push(name.to_owned());
                     }
-                    field_names.push(name.to_owned());
 
-                    let field = StructField {
-                        name,
-                        r#type: r#type.to_owned().into(),
-                        tag: tag.to_owned(),
-                        is_embedded: false,
-                    };
-                    fields.push(field);
+                    names.push(name);
                 }
+
+                let field_decl = FieldDecl {
+                    struct_field: StructField::IdentifierListType(names, r#type.into()),
+                    tag: tag.to_owned(),
+                };
+                field_decls.push(field_decl);
             }
         }
 
-        Ok(Self { fields })
+        Ok(Self { field_decls })
     }
 }
 
+//
+//
+//
 trait StructFieldName {
     fn struct_field_name(&self) -> String;
 }

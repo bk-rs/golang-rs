@@ -23,7 +23,9 @@ pub use self::map_type::{MapType, MapTypeParseError};
 pub use self::parenthesized_type::{ParenthesizedType, ParenthesizedTypeParseError};
 pub use self::pointer_type::{PointerType, PointerTypeParseError};
 pub use self::slice_type::{SliceType, SliceTypeParseError};
-pub use self::struct_type::{StructField, StructType, StructTypeParseError};
+pub use self::struct_type::{
+    EmbeddedField, FieldDecl, StructField, StructType, StructTypeParseError,
+};
 
 #[derive(PartialEq, Eq, Debug, Clone)]
 pub enum Type {

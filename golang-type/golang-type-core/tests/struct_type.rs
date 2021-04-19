@@ -3,8 +3,8 @@ use std::{error, fs, path::PathBuf};
 use golang_type_core::{
     golang_struct_tag::{ConventionStructTag, StructTag},
     golang_type_name_core::TypeName,
-    FunctionType, PointerType, SliceType, StructField, StructType, StructTypeParseError, Type,
-    TypeParseError,
+    EmbeddedField, FieldDecl, FunctionType, PointerType, SliceType, StructField, StructType,
+    StructTypeParseError, Type, TypeParseError,
 };
 
 #[test]
@@ -17,47 +17,36 @@ fn test_parse_embedded_field() -> Result<(), Box<dyn error::Error>> {
     assert_eq!(
         r#type,
         Type::StructType(StructType {
-            fields: vec![
-                StructField {
-                    name: "T1".to_owned(),
-                    r#type: Type::TypeName(TypeName::Identifier("T1".to_owned()).to_owned()).into(),
-                    is_embedded: true,
+            field_decls: vec![
+                FieldDecl {
+                    struct_field: StructField::EmbeddedField(EmbeddedField::TypeName(
+                        TypeName::Identifier("T1".to_owned())
+                    )),
                     tag: None,
                 },
-                StructField {
-                    name: "T2".to_owned(),
-                    r#type: Type::TypeName(TypeName::Identifier("T2".to_owned()).to_owned()).into(),
-                    is_embedded: true,
+                FieldDecl {
+                    struct_field: StructField::EmbeddedField(EmbeddedField::TypeName(
+                        TypeName::Identifier("T2".to_owned())
+                    )),
                     tag: None,
                 },
-                StructField {
-                    name: "Duration".to_owned(),
-                    r#type: Type::TypeName(
-                        TypeName::QualifiedIdent("P".to_owned(), "Duration".to_owned()).to_owned()
-                    )
-                    .into(),
-                    is_embedded: true,
+                FieldDecl {
+                    struct_field: StructField::EmbeddedField(EmbeddedField::TypeName(
+                        TypeName::QualifiedIdent("P".to_owned(), "Duration".to_owned())
+                    )),
                     tag: None,
                 },
-                StructField {
-                    name: "Month".to_owned(),
-                    r#type: Type::TypeName(
-                        TypeName::QualifiedIdent("P".to_owned(), "Month".to_owned()).to_owned()
-                    )
-                    .into(),
-                    is_embedded: true,
+                FieldDecl {
+                    struct_field: StructField::EmbeddedField(EmbeddedField::TypeName(
+                        TypeName::QualifiedIdent("P".to_owned(), "Month".to_owned())
+                    )),
                     tag: None,
                 },
-                StructField {
-                    name: "x".to_owned(),
-                    r#type: Type::TypeName(TypeName::Int).into(),
-                    is_embedded: false,
-                    tag: None,
-                },
-                StructField {
-                    name: "y".to_owned(),
-                    r#type: Type::TypeName(TypeName::Int).into(),
-                    is_embedded: false,
+                FieldDecl {
+                    struct_field: StructField::IdentifierListType(
+                        vec!["x".to_owned(), "y".to_owned()],
+                        Type::TypeName(TypeName::Int).into()
+                    ),
                     tag: None,
                 },
             ]
@@ -76,50 +65,49 @@ fn test_parse_normal() -> Result<(), Box<dyn error::Error>> {
     assert_eq!(
         r#type,
         Type::StructType(StructType {
-            fields: vec![
-                StructField {
-                    name: "x".to_owned(),
-                    r#type: Type::TypeName(TypeName::Int).into(),
-                    is_embedded: false,
+            field_decls: vec![
+                FieldDecl {
+                    struct_field: StructField::IdentifierListType(
+                        vec!["x".to_owned(), "y".to_owned()],
+                        Type::TypeName(TypeName::Int).into()
+                    ),
                     tag: None,
                 },
-                StructField {
-                    name: "y".to_owned(),
-                    r#type: Type::TypeName(TypeName::Int).into(),
-                    is_embedded: false,
+                FieldDecl {
+                    struct_field: StructField::IdentifierListType(
+                        vec!["u".to_owned()],
+                        Type::TypeName(TypeName::Float32).into()
+                    ),
                     tag: None,
                 },
-                StructField {
-                    name: "u".to_owned(),
-                    r#type: Type::TypeName(TypeName::Float32).into(),
-                    is_embedded: false,
+                FieldDecl {
+                    struct_field: StructField::IdentifierListType(
+                        vec!["_".to_owned()],
+                        Type::TypeName(TypeName::Float32).into()
+                    ),
                     tag: None,
                 },
-                StructField {
-                    name: "_".to_owned(),
-                    r#type: Type::TypeName(TypeName::Float32).into(),
-                    is_embedded: false,
-                    tag: None,
-                },
-                StructField {
-                    name: "A".to_owned(),
-                    r#type: Type::PointerType(
-                        PointerType(
-                            Type::SliceType(SliceType {
-                                element: Type::TypeName(TypeName::Int).into()
-                            })
+                FieldDecl {
+                    struct_field: StructField::IdentifierListType(
+                        vec!["A".to_owned()],
+                        Type::PointerType(
+                            PointerType(
+                                Type::SliceType(SliceType {
+                                    element: Type::TypeName(TypeName::Int).into()
+                                })
+                                .into()
+                            )
                             .into()
                         )
-                        .into()
-                    )
-                    .into(),
-                    is_embedded: false,
+                        .into(),
+                    ),
                     tag: None,
                 },
-                StructField {
-                    name: "F".to_owned(),
-                    r#type: Type::FunctionType(FunctionType {}).into(),
-                    is_embedded: false,
+                FieldDecl {
+                    struct_field: StructField::IdentifierListType(
+                        vec!["F".to_owned()],
+                        Type::FunctionType(FunctionType {}).into(),
+                    ),
                     tag: None,
                 },
             ]
@@ -138,20 +126,22 @@ fn test_parse_tag() -> Result<(), Box<dyn error::Error>> {
     assert_eq!(
         r#type,
         Type::StructType(StructType {
-            fields: vec![
-                StructField {
-                    name: "microsec".to_owned(),
-                    r#type: Type::TypeName(TypeName::Uint64).into(),
-                    is_embedded: false,
+            field_decls: vec![
+                FieldDecl {
+                    struct_field: StructField::IdentifierListType(
+                        vec!["microsec".to_owned()],
+                        Type::TypeName(TypeName::Uint64).into(),
+                    ),
                     tag: Some(StructTag::Convention(vec![ConventionStructTag::Unknown(
                         "protobuf".to_owned(),
                         "1".to_owned()
                     )])),
                 },
-                StructField {
-                    name: "serverIP6".to_owned(),
-                    r#type: Type::TypeName(TypeName::Uint64).into(),
-                    is_embedded: false,
+                FieldDecl {
+                    struct_field: StructField::IdentifierListType(
+                        vec!["serverIP6".to_owned()],
+                        Type::TypeName(TypeName::Uint64).into(),
+                    ),
                     tag: Some(StructTag::Convention(vec![ConventionStructTag::Unknown(
                         "protobuf".to_owned(),
                         "2".to_owned()
