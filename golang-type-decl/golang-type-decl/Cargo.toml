@@ -13,7 +13,7 @@ categories = []
 readme = "README.md"
 
 [dependencies]
-golang-type-decl-core = { version = "0.0", path = "../golang-type-decl-core" }
+golang-type-decl-core = { version = "0.0", features = ["enable-quote-to_tokens"], path = "../golang-type-decl-core" }
 golang-type-decl-macro = { version = "0.0", path = "../golang-type-decl-macro" }
 
 [dev-dependencies]
