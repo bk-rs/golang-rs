@@ -1,8 +1,8 @@
-use golang_type_decl::json_struct;
+use golang_type_decl::gen_json_struct;
 
 #[test]
 fn simple() {
-    json_struct!(
+    gen_json_struct!(
         r#"
     type User struct {
         Name   string
