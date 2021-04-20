@@ -5,11 +5,13 @@ use syn::{
 
 pub struct Input {
     pub code: String,
+    pub index: usize,
 }
 
 impl Parse for Input {
     fn parse(input: ParseStream) -> Result<Self, SynError> {
         let mut code = String::new();
+        let index = 0;
 
         let mut expect_comma = false;
 
@@ -35,6 +37,6 @@ impl Parse for Input {
             expect_comma = true;
         }
 
-        Ok(Self { code })
+        Ok(Self { code, index })
     }
 }
