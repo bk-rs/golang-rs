@@ -17,13 +17,13 @@ fn simple() -> Result<(), Box<dyn error::Error>> {
 
     let user: User = serde_json::from_str(
         r#"
-{
-    "Name": "foo",
-    "Age": "20",
-    "Gender": null,
-    "Address": "bar"
-}
-"#,
+    {
+        "Name": "foo",
+        "Age": "20",
+        "Gender": null,
+        "Address": "bar"
+    }
+    "#,
     )?;
 
     assert_eq!(user.name, "foo");

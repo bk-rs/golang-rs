@@ -1,0 +1,1 @@
+../../../golang-type-decl-core/tests/files/simple.go
