@@ -2,8 +2,8 @@ pub use golang_type_name_core::*;
 pub use golang_type_name_macro;
 
 #[macro_export]
-macro_rules! type_name {
+macro_rules! gen_type_name {
     ($type_name_lit:literal) => {
-        golang_type_name_macro::type_name!($type_name_lit)
+        golang_type_name_macro::gen_type_name!($type_name_lit)
     };
 }

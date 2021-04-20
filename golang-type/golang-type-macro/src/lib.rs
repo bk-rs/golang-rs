@@ -7,10 +7,10 @@ use syn::{
     parse_macro_input, Error as SynError, LitStr,
 };
 
-struct TypeInput {
+struct GenTypeInput {
     r#type: Type,
 }
-impl Parse for TypeInput {
+impl Parse for GenTypeInput {
     fn parse(input: ParseStream) -> Result<Self, SynError> {
         let r#type = input.parse::<LitStr>()?;
 
@@ -24,8 +24,8 @@ impl Parse for TypeInput {
 }
 
 #[proc_macro]
-pub fn r#type(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
-    let input = parse_macro_input!(input as TypeInput);
+pub fn gen_type(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+    let input = parse_macro_input!(input as GenTypeInput);
 
     let r#type = input.r#type;
 
