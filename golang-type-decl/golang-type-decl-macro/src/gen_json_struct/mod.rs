@@ -15,7 +15,7 @@ pub fn get_output(input: Input) -> TokenStream {
         }
     };
 
-    let type_def = match type_decl.type_specs.into_iter().skip(input.index).next() {
+    let type_def = match type_decl.type_specs.into_iter().nth(input.index) {
         Some(TypeSpec::TypeDef(type_def)) => type_def,
         Some(TypeSpec::AliasDecl(_)) => {
             let err = "Require [Type definitions](https://golang.org/ref/spec#TypeDef)";

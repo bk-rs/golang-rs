@@ -107,8 +107,10 @@ pub mod enable_quote_to_tokens {
                             .iter()
                             .filter(|x| x != &"_")
                             .map(|name| {
-                                let field_name_serde_rename =
-                                    rename.to_owned().unwrap_or(name.to_owned());
+                                let field_serde_attr = JsonStructFieldSerdeAttr {
+                                    rename: rename.to_owned().unwrap_or_else(|| name.to_owned()),
+                                    is_omitempty,
+                                };
                                 let field_name = format_ident!("r#{}", name.to_case(Case::Snake));
                                 let field_type = JsonStructFieldType {
                                     r#type: *r#type.to_owned(),
@@ -117,14 +119,16 @@ pub mod enable_quote_to_tokens {
                                 };
 
                                 quote! {
-                                    #[serde(rename = #field_name_serde_rename)]
+                                    #[serde(#field_serde_attr)]
                                     pub #field_name: #field_type,
                                 }
                             })
                             .collect(),
                         StructField::EmbeddedField(embedded_field) => {
-                            let field_name_serde_rename =
-                                rename.to_owned().unwrap_or(embedded_field.name());
+                            let field_serde_attr = JsonStructFieldSerdeAttr {
+                                rename: rename.unwrap_or_else(|| embedded_field.name()),
+                                is_omitempty,
+                            };
                             let field_name =
                                 format_ident!("r#{}", embedded_field.name().to_case(Case::Snake));
                             let field_type = JsonStructFieldType {
@@ -134,7 +138,7 @@ pub mod enable_quote_to_tokens {
                             };
 
                             vec![quote! {
-                                #[serde(rename = #field_name_serde_rename)]
+                                #[serde(#field_serde_attr)]
                                 pub #field_name: #field_type,
                             }]
                         }
@@ -144,13 +148,38 @@ pub mod enable_quote_to_tokens {
                 .collect();
 
             let token = quote! {
-                #[derive(::serde::Deserialize, Debug, Clone)]
+                #[derive(::serde::Deserialize, ::serde::Serialize, Debug, Clone)]
                 pub struct #struct_name {
                     #(#struct_fields)*
                 }
             };
 
             tokens.append_all(token);
+        }
+    }
+
+    struct JsonStructFieldSerdeAttr {
+        rename: String,
+        is_omitempty: Option<bool>,
+    }
+    impl ToTokens for JsonStructFieldSerdeAttr {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
+            tokens.append(format_ident!("rename"));
+            tokens.append(Punct::new('=', Spacing::Alone));
+            let rename = &self.rename;
+            tokens.append_all(quote!(#rename));
+
+            if self.is_omitempty == Some(true) {
+                tokens.append(Punct::new(',', Spacing::Alone));
+
+                tokens.append(format_ident!("default"));
+                tokens.append(Punct::new(',', Spacing::Alone));
+
+                tokens.append(format_ident!("skip_serializing_if"));
+                tokens.append(Punct::new('=', Spacing::Alone));
+                let skip_serializing_if_val = "Option::is_none";
+                tokens.append_all(quote!(#skip_serializing_if_val));
+            }
         }
     }
 

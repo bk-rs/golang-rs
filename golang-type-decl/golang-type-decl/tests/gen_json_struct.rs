@@ -20,7 +20,6 @@ fn simple() -> Result<(), Box<dyn error::Error>> {
     {
         "Name": "foo",
         "Age": "20",
-        "Gender": null,
         "Address": "bar"
     }
     "#,
