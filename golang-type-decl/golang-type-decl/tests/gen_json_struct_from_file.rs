@@ -4,7 +4,9 @@ use golang_type_decl::gen_json_struct_from_file;
 
 #[test]
 fn simple() -> Result<(), Box<dyn error::Error>> {
-    // gen_json_struct_from_file!("files/simple.go");
+    type Comparable = usize;
+
+    gen_json_struct_from_file!("tests/files/simple.go#L16-L19");
 
     Ok(())
 }
