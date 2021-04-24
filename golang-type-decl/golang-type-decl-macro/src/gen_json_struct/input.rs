@@ -119,7 +119,7 @@ fn parse_fragment(fragment: &str) -> Result<(Option<usize>, Option<usize>), Stri
     let cap = re
         .captures_iter(fragment)
         .next()
-        .ok_or("fragment invalid".to_owned())?;
+        .ok_or_else(|| "fragment invalid".to_owned())?;
 
     let start = if let Some(val) = cap.name("start") {
         Some(
@@ -141,7 +141,7 @@ fn parse_fragment(fragment: &str) -> Result<(Option<usize>, Option<usize>), Stri
         None
     };
 
-    if start.unwrap_or_default() > end.unwrap_or_default() {
+    if end.is_some() && start.unwrap_or_default() > end.unwrap_or_default() {
         return Err("fragment invalid".to_owned());
     }
 

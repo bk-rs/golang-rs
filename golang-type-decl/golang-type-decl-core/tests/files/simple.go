@@ -18,5 +18,9 @@ type TreeNode struct {
 	value       *Comparable
 }
 
+type Foo struct {
+	bar uint
+}
+
 func main() {
 }
