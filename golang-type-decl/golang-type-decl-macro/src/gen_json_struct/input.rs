@@ -3,19 +3,19 @@ use std::{env, fs, path::PathBuf};
 use regex::Regex;
 use syn::{
     parse::{Parse, ParseStream},
-    Error as SynError, Ident, LitStr, Token,
+    Error as SynError, Ident, LitInt, LitStr, Token,
 };
 use url::Url;
 
 pub struct Input {
     pub code: String,
-    pub index: usize,
+    pub nth: usize,
 }
 
 impl Parse for Input {
     fn parse(input: ParseStream) -> Result<Self, SynError> {
         let mut code = String::new();
-        let index = 0;
+        let mut nth = 0;
 
         let mut expect_comma = false;
 
@@ -99,8 +99,8 @@ impl Parse for Input {
                 } else {
                     content
                 };
-
-                println!("{}", code);
+            } else if key == "nth" {
+                nth = input.parse::<LitInt>()?.base10_parse::<usize>()?;
             } else {
                 let message = format!("unexpected input key: {}", key);
                 return Err(SynError::new_spanned(key, message));
@@ -109,7 +109,7 @@ impl Parse for Input {
             expect_comma = true;
         }
 
-        Ok(Self { code, index })
+        Ok(Self { code, nth })
     }
 }
 

@@ -22,5 +22,12 @@ type Foo struct {
 	bar uint
 }
 
+type (
+	Bar = int
+	Foo struct {
+		bar uint
+	}
+)
+
 func main() {
 }

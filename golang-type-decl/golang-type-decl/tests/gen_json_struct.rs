@@ -32,3 +32,21 @@ fn simple() -> Result<(), Box<dyn error::Error>> {
 
     Ok(())
 }
+
+#[test]
+fn with_nth() -> Result<(), Box<dyn error::Error>> {
+    gen_json_struct!(
+        r#"
+    type (
+        Bar = int
+        Foo struct {
+            bar uint
+        }
+    )
+    "#,
+        nth = 1
+    );
+    Foo { bar: 0 };
+
+    Ok(())
+}
