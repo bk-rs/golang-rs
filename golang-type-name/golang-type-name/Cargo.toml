@@ -1,6 +1,6 @@
 [package]
 name = "golang-type-name"
-version = "0.0.0"
+version = "0.1.0"
 authors = ["vkill <vkill.net@gmail.com>"]
 edition = "2018"
 description = "Golang TypeName"
@@ -13,8 +13,8 @@ categories = []
 readme = "README.md"
 
 [dependencies]
-golang-type-name-core = { version = "0.0", features = ["enable-quote-to_tokens"], path = "../golang-type-name-core" }
-golang-type-name-macro = { version = "0.0", path = "../golang-type-name-macro" }
+golang-type-name-core = { version = "=0.1.0", features = ["enable-quote-to_tokens"], path = "../golang-type-name-core" }
+golang-type-name-macro = { version = "=0.1.0", path = "../golang-type-name-macro" }
 
 [dev-dependencies]
 num-complex = { version = "0.4", default-features = false }

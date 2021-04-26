@@ -1,6 +1,6 @@
 [package]
 name = "golang-type-name-macro"
-version = "0.0.0"
+version = "0.1.0"
 authors = ["vkill <vkill.net@gmail.com>"]
 edition = "2018"
 description = "Golang TypeName Macro"
@@ -16,7 +16,7 @@ readme = "README.md"
 proc-macro = true
 
 [dependencies]
-golang-type-name-core = { version = "0.0", features = ["enable-quote-to_tokens"], path = "../golang-type-name-core" }
+golang-type-name-core = { version = "=0.1.0", features = ["enable-quote-to_tokens"], path = "../golang-type-name-core" }
 
 proc-macro2 = { version = "1.0", default-features = false }
 quote = { version = "1.0", default-features = false }
