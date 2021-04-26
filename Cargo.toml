@@ -15,4 +15,6 @@ members = [
     "golang-type-name/golang-type-name-core",
     "golang-type-name/golang-type-name-macro",
     "golang-var-decl/golang-var-decl",
+    "golang-var-decl/golang-var-decl-core",
+    "golang-var-decl/golang-var-decl-macro",
 ]

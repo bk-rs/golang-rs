@@ -1,0 +1,1 @@
+../golang-var-decl/README.md
