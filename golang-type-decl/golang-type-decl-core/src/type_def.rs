@@ -49,7 +49,7 @@ pub struct JsonStructDef {
 }
 
 #[cfg(feature = "enable-quote-to_tokens")]
-pub mod enable_quote_to_tokens {
+mod enable_quote_to_tokens {
     use super::JsonStructDef;
 
     use convert_case::{Case, Casing as _};
