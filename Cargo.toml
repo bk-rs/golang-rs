@@ -1,6 +1,8 @@
 [workspace]
 members = [
     "golang-const-decl/golang-const-decl",
+    "golang-const-decl/golang-const-decl-core",
+    "golang-const-decl/golang-const-decl-macro",
     "golang-parser",
     "golang-struct-tag",
     "golang-type/golang-type",
