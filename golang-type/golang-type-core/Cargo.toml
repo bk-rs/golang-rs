@@ -22,7 +22,7 @@ enable-quote-to_tokens = ["golang-type-name-core/enable-quote-to_tokens", "proc-
 [dependencies]
 golang-type-name-core = { version = "0.0", path = "../../golang-type-name/golang-type-name-core" }
 golang-struct-tag = { version = "0.0", path = "../../golang-struct-tag" }
-golang-parser = { version = "0.0", path = "../../golang-parser" }
+golang-parser = { version = "~0.1", path = "../../golang-parser" }
 
 thiserror = { version = "1.0", default-features = false }
 

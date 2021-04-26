@@ -13,7 +13,7 @@ categories = []
 readme = "README.md"
 
 [dependencies]
-golang-parser = { version = "0.0", path = "../golang-parser" } 
+golang-parser = { version = "~0.1", path = "../golang-parser" } 
 
 pest = { version = "2.1", default-features = false }
 pest_derive = { version = "2.1", default-features = false }

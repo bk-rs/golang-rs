@@ -21,7 +21,7 @@ enable-quote-to_tokens = ["golang-type-core/enable-quote-to_tokens", "proc-macro
 
 [dependencies]
 golang-type-core = { version = "0.0", path = "../../golang-type/golang-type-core" }
-golang-parser = { version = "0.0", path = "../../golang-parser" }
+golang-parser = { version = "~0.1", path = "../../golang-parser" }
 
 thiserror = { version = "1.0", default-features = false }
 
