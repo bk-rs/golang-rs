@@ -1,6 +1,6 @@
 [package]
 name = "golang-type-core"
-version = "0.0.0"
+version = "0.1.0"
 authors = ["vkill <vkill.net@gmail.com>"]
 edition = "2018"
 description = "Golang Type Core"
