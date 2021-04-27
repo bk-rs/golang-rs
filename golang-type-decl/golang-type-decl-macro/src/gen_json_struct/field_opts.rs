@@ -24,9 +24,9 @@ impl Parse for FieldOpts {
                 if input.peek(LitStr) && input.peek2(Token![->]) {
                     let field_opt_k = input.parse::<LitStr>()?.value();
                     input.parse::<Token![->]>()?;
-                    if field_opt_k == "type" {
-                        let r#type = input.parse::<Type>()?;
-                        field_opt.r#type = Some(quote!(#r#type));
+                    if field_opt_k == "special_type" {
+                        let special_type = input.parse::<Type>()?;
+                        field_opt.special_type = Some(quote!(#special_type));
                     } else if field_opt_k == "serde_deserialize_with" {
                         let serde_deserialize_with = input.parse::<LitStr>()?.value();
                         field_opt.serde_deserialize_with = Some(serde_deserialize_with);

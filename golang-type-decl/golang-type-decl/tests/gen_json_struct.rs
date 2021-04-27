@@ -60,10 +60,10 @@ fn with_field_opts() -> Result<(), Box<dyn error::Error>> {
     }
     "#;
         "Age" => {
-            "type": u8
+            "special_type": u8
         },
         "Actived" => {
-            "type": bool,
+            "special_type": bool,
             "serde_deserialize_with": "deserialize_bool_from_anything"
         }
     );
@@ -101,7 +101,7 @@ fn with_nth_and_field_opts() {
         nth = 1
     ;
         "bar" => {
-            "type": bool
+            "special_type": bool
         }
     );
     Foo { bar: true };

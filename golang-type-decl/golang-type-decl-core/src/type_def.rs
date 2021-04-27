@@ -72,7 +72,7 @@ pub type JsonStructFieldName = String;
 #[cfg(feature = "enable-quote-to_tokens")]
 #[derive(Default, Debug, Clone)]
 pub struct JsonStructFieldOption {
-    pub r#type: Option<TokenStream>,
+    pub special_type: Option<TokenStream>,
     pub serde_deserialize_with: Option<String>,
 }
 
@@ -153,7 +153,7 @@ mod enable_quote_to_tokens {
                                     r#type: *r#type.to_owned(),
                                     is_string,
                                     is_omitempty,
-                                    special_type: field_opt.r#type,
+                                    special_type: field_opt.special_type,
                                 };
 
                                 if self.opt.skip_serde_ser && self.opt.skip_serde_de {
@@ -189,7 +189,7 @@ mod enable_quote_to_tokens {
                                 r#type: embedded_field.r#type(),
                                 is_string,
                                 is_omitempty,
-                                special_type: field_opt.r#type,
+                                special_type: field_opt.special_type,
                             };
 
                             vec![if self.opt.skip_serde_ser && self.opt.skip_serde_de {
@@ -293,13 +293,13 @@ mod enable_quote_to_tokens {
     }
     impl ToTokens for JsonStructFieldType {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            if let Some(special_type) = &self.special_type {
-                tokens.append_all(special_type.to_owned());
-                return;
-            }
+            let mut token = if let Some(special_type) = &self.special_type {
+                special_type.to_owned()
+            } else {
+                let r#type = &self.r#type;
+                quote!(#r#type)
+            };
 
-            let r#type = &self.r#type;
-            let mut token = quote!(#r#type);
             if self.is_string == Some(true) {
                 let r#type = Type::TypeName(TypeName::String);
                 token = quote!(#r#type);
