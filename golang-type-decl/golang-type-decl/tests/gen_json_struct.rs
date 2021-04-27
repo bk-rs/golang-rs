@@ -35,7 +35,7 @@ fn simple() -> Result<(), Box<dyn error::Error>> {
 }
 
 #[test]
-fn with_nth() -> Result<(), Box<dyn error::Error>> {
+fn with_nth() {
     gen_json_struct!(
         r#"
     type (
@@ -48,8 +48,6 @@ fn with_nth() -> Result<(), Box<dyn error::Error>> {
         nth = 1
     );
     Foo { bar: 0 };
-
-    Ok(())
 }
 
 #[test]
@@ -87,4 +85,24 @@ fn with_field_opts() -> Result<(), Box<dyn error::Error>> {
     assert_eq!(user.actived, true);
 
     Ok(())
+}
+
+#[test]
+fn with_nth_and_field_opts() {
+    gen_json_struct!(
+        r#"
+    type (
+        Bar = int
+        Foo struct {
+            bar uint
+        }
+    )
+    "#,
+        nth = 1
+    ;
+        "bar" => {
+            "type": bool
+        }
+    );
+    Foo { bar: true };
 }
