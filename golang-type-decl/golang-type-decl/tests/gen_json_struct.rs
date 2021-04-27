@@ -106,3 +106,16 @@ fn with_nth_and_field_opts() {
     );
     Foo { bar: true };
 }
+
+#[test]
+fn with_skip_serde_ser_and_skip_serde_de() {
+    gen_json_struct!(
+        r#"
+    type Foo struct {
+        bar uint
+    }
+    "#,
+        skip_serde_ser = true,
+        skip_serde_de = true
+    );
+}

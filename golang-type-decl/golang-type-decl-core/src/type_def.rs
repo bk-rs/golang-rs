@@ -55,7 +55,15 @@ impl TypeDef {
 pub struct JsonStructDef {
     pub name: String,
     pub struct_type: StructType,
+    pub opt: JsonStructOption,
     pub field_opts: HashMap<JsonStructFieldName, JsonStructFieldOption>,
+}
+
+#[cfg(feature = "enable-quote-to_tokens")]
+#[derive(Default, Debug)]
+pub struct JsonStructOption {
+    pub skip_serde_ser: bool,
+    pub skip_serde_de: bool,
 }
 
 #[cfg(feature = "enable-quote-to_tokens")]
@@ -137,6 +145,8 @@ mod enable_quote_to_tokens {
                                     rename: rename.to_owned().unwrap_or_else(|| name.to_owned()),
                                     is_omitempty,
                                     serde_deserialize_with: field_opt.serde_deserialize_with,
+                                    skip_serde_ser: self.opt.skip_serde_ser,
+                                    skip_serde_de: self.opt.skip_serde_de,
                                 };
                                 let field_name = format_ident!("r#{}", name.to_case(Case::Snake));
                                 let field_type = JsonStructFieldType {
@@ -146,9 +156,15 @@ mod enable_quote_to_tokens {
                                     special_type: field_opt.r#type,
                                 };
 
-                                quote! {
-                                    #[serde(#field_serde_attr)]
-                                    pub #field_name: #field_type,
+                                if self.opt.skip_serde_ser && self.opt.skip_serde_de {
+                                    quote! {
+                                        pub #field_name: #field_type,
+                                    }
+                                } else {
+                                    quote! {
+                                        #[serde(#field_serde_attr)]
+                                        pub #field_name: #field_type,
+                                    }
                                 }
                             })
                             .collect(),
@@ -165,6 +181,8 @@ mod enable_quote_to_tokens {
                                 rename: rename.unwrap_or_else(|| name.to_owned()),
                                 is_omitempty,
                                 serde_deserialize_with: field_opt.serde_deserialize_with,
+                                skip_serde_ser: self.opt.skip_serde_ser,
+                                skip_serde_de: self.opt.skip_serde_de,
                             };
                             let field_name = format_ident!("r#{}", name.to_case(Case::Snake));
                             let field_type = JsonStructFieldType {
@@ -174,9 +192,15 @@ mod enable_quote_to_tokens {
                                 special_type: field_opt.r#type,
                             };
 
-                            vec![quote! {
-                                #[serde(#field_serde_attr)]
-                                pub #field_name: #field_type,
+                            vec![if self.opt.skip_serde_ser && self.opt.skip_serde_de {
+                                quote! {
+                                    pub #field_name: #field_type,
+                                }
+                            } else {
+                                quote! {
+                                    #[serde(#field_serde_attr)]
+                                    pub #field_name: #field_type,
+                                }
                             }]
                         }
                     }
@@ -184,8 +208,13 @@ mod enable_quote_to_tokens {
                 .flatten()
                 .collect();
 
+            let serde_derive = JsonStructSerdeDerive {
+                skip_serde_ser: self.opt.skip_serde_ser,
+                skip_serde_de: self.opt.skip_serde_de,
+            };
+
             let token = quote! {
-                #[derive(::serde::Deserialize, ::serde::Serialize, Debug, Clone)]
+                #[derive(#serde_derive Debug, Clone)]
                 pub struct #struct_name {
                     #(#struct_fields)*
                 }
@@ -195,10 +224,32 @@ mod enable_quote_to_tokens {
         }
     }
 
+    struct JsonStructSerdeDerive {
+        skip_serde_ser: bool,
+        skip_serde_de: bool,
+    }
+    impl ToTokens for JsonStructSerdeDerive {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
+            if !self.skip_serde_de {
+                tokens.append_all(quote!(::serde::Deserialize));
+
+                tokens.append(Punct::new(',', Spacing::Alone));
+            }
+
+            if !self.skip_serde_ser {
+                tokens.append_all(quote!(::serde::Serialize));
+
+                tokens.append(Punct::new(',', Spacing::Alone));
+            }
+        }
+    }
+
     struct JsonStructFieldSerdeAttr {
         rename: String,
         is_omitempty: Option<bool>,
         serde_deserialize_with: Option<String>,
+        skip_serde_ser: bool,
+        skip_serde_de: bool,
     }
     impl ToTokens for JsonStructFieldSerdeAttr {
         fn to_tokens(&self, tokens: &mut TokenStream) {
@@ -212,20 +263,24 @@ mod enable_quote_to_tokens {
 
                 tokens.append(format_ident!("default"));
 
-                tokens.append(Punct::new(',', Spacing::Alone));
+                if !self.skip_serde_ser {
+                    tokens.append(Punct::new(',', Spacing::Alone));
 
-                tokens.append(format_ident!("skip_serializing_if"));
-                tokens.append(Punct::new('=', Spacing::Alone));
-                let skip_serializing_if_val = "Option::is_none";
-                tokens.append_all(quote!(#skip_serializing_if_val));
+                    tokens.append(format_ident!("skip_serializing_if"));
+                    tokens.append(Punct::new('=', Spacing::Alone));
+                    let skip_serializing_if_val = "Option::is_none";
+                    tokens.append_all(quote!(#skip_serializing_if_val));
+                }
             }
 
             if let Some(serde_deserialize_with) = &self.serde_deserialize_with {
-                tokens.append(Punct::new(',', Spacing::Alone));
+                if !self.skip_serde_de {
+                    tokens.append(Punct::new(',', Spacing::Alone));
 
-                tokens.append(format_ident!("deserialize_with"));
-                tokens.append(Punct::new('=', Spacing::Alone));
-                tokens.append_all(quote!(#serde_deserialize_with));
+                    tokens.append(format_ident!("deserialize_with"));
+                    tokens.append(Punct::new('=', Spacing::Alone));
+                    tokens.append_all(quote!(#serde_deserialize_with));
+                }
             }
         }
     }

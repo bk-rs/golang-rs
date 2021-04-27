@@ -3,7 +3,7 @@ use std::{env, fs, path::PathBuf};
 use regex::Regex;
 use syn::{
     parse::{Parse, ParseStream},
-    Error as SynError, Ident, LitInt, LitStr, Token,
+    Error as SynError, Ident, LitBool, LitInt, LitStr, Token,
 };
 use url::Url;
 
@@ -12,6 +12,8 @@ use super::field_opts::FieldOpts;
 pub struct Input {
     pub code: String,
     pub nth: usize,
+    pub skip_serde_ser: bool,
+    pub skip_serde_de: bool,
     pub field_opts: FieldOpts,
 }
 
@@ -19,6 +21,8 @@ impl Parse for Input {
     fn parse(input: ParseStream) -> Result<Self, SynError> {
         let mut code = String::new();
         let mut nth = 0;
+        let mut skip_serde_ser = false;
+        let mut skip_serde_de = false;
         let mut field_opts = FieldOpts::default();
 
         while !input.is_empty() {
@@ -43,6 +47,12 @@ impl Parse for Input {
             } else if key == "nth" {
                 nth = input.parse::<LitInt>()?.base10_parse::<usize>()?;
                 input.parse::<Token![,]>()?;
+            } else if key == "skip_serde_ser" {
+                skip_serde_ser = input.parse::<LitBool>()?.value();
+                input.parse::<Token![,]>()?;
+            } else if key == "skip_serde_de" {
+                skip_serde_de = input.parse::<LitBool>()?.value();
+                input.parse::<Token![,]>()?;
             } else if key == "field_opts" {
                 field_opts = input.parse()?;
                 input.parse::<Token![,]>()?;
@@ -55,6 +65,8 @@ impl Parse for Input {
         Ok(Self {
             code,
             nth,
+            skip_serde_ser,
+            skip_serde_de,
             field_opts,
         })
     }
