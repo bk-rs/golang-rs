@@ -18,21 +18,21 @@ impl Parse for FieldOpts {
             let field_name = input.parse::<LitStr>()?;
             input.parse::<Token![=>]>()?;
 
-            let mut opt = JsonStructFieldOption::default();
+            let mut field_opt = JsonStructFieldOption::default();
 
             loop {
                 if input.peek(LitStr) && input.peek2(Token![->]) {
-                    let opt_k = input.parse::<LitStr>()?.value();
+                    let field_opt_k = input.parse::<LitStr>()?.value();
                     input.parse::<Token![->]>()?;
-                    if opt_k == "type" {
+                    if field_opt_k == "type" {
                         let r#type = input.parse::<Type>()?;
-                        opt.r#type = Some(quote!(#r#type));
-                    } else if opt_k == "serde_deserialize_with" {
+                        field_opt.r#type = Some(quote!(#r#type));
+                    } else if field_opt_k == "serde_deserialize_with" {
                         let serde_deserialize_with = input.parse::<LitStr>()?.value();
-                        opt.serde_deserialize_with = Some(serde_deserialize_with);
+                        field_opt.serde_deserialize_with = Some(serde_deserialize_with);
                     } else {
-                        let err = format!("unexpected opt key: {}", opt_k);
-                        return Err(SynError::new_spanned(opt_k, err));
+                        let err = format!("unexpected opt key: {}", field_opt_k);
+                        return Err(SynError::new_spanned(field_opt_k, err));
                     }
                 }
 
@@ -43,7 +43,7 @@ impl Parse for FieldOpts {
                 }
             }
 
-            if inner.insert(field_name.value(), opt).is_some() {
+            if inner.insert(field_name.value(), field_opt).is_some() {
                 let err = format!("duplicate field name: {}", &field_name.value());
                 return Err(SynError::new_spanned(field_name, err));
             }

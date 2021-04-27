@@ -9,8 +9,8 @@ macro_rules! gen_json_struct {
     ($code:literal, nth = $nth:literal) => {
         golang_type_decl_macro::gen_json_struct!(code = $code, nth = $nth,);
     };
-    ($code:literal; $( $field:literal => { $( $opt_k:literal : $opt_v:tt $(,)? ),* }$(,)? ),*) => {
-        golang_type_decl_macro::gen_json_struct!(code = $code, field_opts = $( $field => $( $opt_k -> $opt_v ,)* ,)* ,);
+    ($code:literal; $( $field:literal => { $( $field_opt_k:literal : $field_opt_v:tt $(,)? ),* }$(,)? ),*) => {
+        golang_type_decl_macro::gen_json_struct!(code = $code, field_opts = $( $field => $( $field_opt_k -> $field_opt_v ,)* ,)* ,);
     };
 }
 
