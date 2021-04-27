@@ -20,91 +20,79 @@ impl Parse for Input {
         while !input.is_empty() {
             let key: Ident = input.parse()?;
             input.parse::<Token![=]>()?;
+
             if key == "code" {
-                code = input
-                    .parse::<LitStr>()?
-                    .value()
-                    .trim_start()
-                    .trim_end()
-                    .to_owned();
+                let s = input.parse::<LitStr>()?.value();
                 input.parse::<Token![,]>()?;
+
+                code = s.trim_start().trim_end().to_owned();
             } else if key == "path" {
-                let path = input.parse::<LitStr>()?.value();
+                let s = input.parse::<LitStr>()?.value();
                 input.parse::<Token![,]>()?;
 
-                let cargo_manifest_dir = match env::var("CARGO_MANIFEST_DIR") {
-                    Ok(cargo_manifest_dir) => cargo_manifest_dir,
-                    Err(_) => {
-                        let message = "CARGO_MANIFEST_DIR is not set; please use Cargo to build";
-                        return Err(SynError::new_spanned(key, message));
-                    }
-                };
-
-                let mut path = PathBuf::from(cargo_manifest_dir).join(path);
-
-                let url = match Url::parse(format!("file://{}", path.to_str().unwrap()).as_str()) {
-                    Ok(url) => url,
+                match path_to_code(&s) {
+                    Ok(s) => code = s,
                     Err(err) => {
-                        let message = format!("failed to read file at {:?}: {}", path, err);
-                        return Err(SynError::new_spanned(key, message));
+                        return Err(SynError::new_spanned(key, err));
                     }
-                };
-
-                let (line_start, line_end) = if let Some(fragment) = url.fragment() {
-                    match parse_fragment(fragment) {
-                        Ok((start, end)) => {
-                            path = PathBuf::from(url.path());
-
-                            (start, end)
-                        }
-                        Err(err) => {
-                            let message = format!("file invalid at {:?}: {}", path, err);
-                            return Err(SynError::new_spanned(key, message));
-                        }
-                    }
-                } else {
-                    (None, None)
-                };
-
-                if !path.exists() {
-                    let message = format!("file not exists at {:?}", path);
-                    return Err(SynError::new_spanned(key, message));
                 }
-
-                let content = match fs::read_to_string(&path) {
-                    Ok(str) => str,
-                    Err(err) => {
-                        let message = format!("failed to read file at {:?}: {}", path, err);
-                        return Err(SynError::new_spanned(key, message));
-                    }
-                };
-
-                code = if let Some(line_start) = line_start {
-                    content
-                        .lines()
-                        .skip(line_start - 1)
-                        .take(
-                            if let Some(line_end) = line_end {
-                                line_end - line_start
-                            } else {
-                                0
-                            } + 1,
-                        )
-                        .collect::<Vec<_>>()
-                        .join("\r\n")
-                } else {
-                    content
-                };
             } else if key == "nth" {
-                nth = input.parse::<LitInt>()?.base10_parse::<usize>()?;
+                let i = input.parse::<LitInt>()?.base10_parse::<usize>()?;
                 input.parse::<Token![,]>()?;
+
+                nth = i;
             } else {
-                let message = format!("unexpected input key: {}", key);
-                return Err(SynError::new_spanned(key, message));
+                let err = format!("unexpected input key: {}", key);
+                return Err(SynError::new_spanned(key, err));
             }
         }
 
         Ok(Self { code, nth })
+    }
+}
+
+fn path_to_code(path: &str) -> Result<String, String> {
+    let cargo_manifest_dir = env::var("CARGO_MANIFEST_DIR")
+        .map_err(|_| "CARGO_MANIFEST_DIR is not set; please use Cargo to build".to_owned())?;
+
+    let mut path = PathBuf::from(cargo_manifest_dir).join(path);
+
+    let url = Url::parse(format!("file://{}", path.to_str().unwrap()).as_str())
+        .map_err(|err| format!("failed to read file at {:?}: {}", path, err))?;
+
+    let (line_start, line_end) = if let Some(fragment) = url.fragment() {
+        parse_fragment(fragment)
+            .map(|v| {
+                path = PathBuf::from(url.path());
+                v
+            })
+            .map_err(|err| format!("file invalid at {:?}: {}", path, err))?
+    } else {
+        (None, None)
+    };
+
+    if !path.exists() {
+        return Err(format!("file not exists at {:?}", path));
+    }
+
+    let content = fs::read_to_string(&path)
+        .map_err(|err| format!("failed to read file at {:?}: {}", path, err))?;
+
+    if let Some(line_start) = line_start {
+        Ok(content
+            .lines()
+            .skip(line_start - 1)
+            .take(
+                if let Some(line_end) = line_end {
+                    line_end - line_start
+                } else {
+                    0
+                } + 1,
+            )
+            .collect::<Vec<_>>()
+            .join("\r\n"))
+    } else {
+        Ok(content)
     }
 }
 
