@@ -1,7 +1,12 @@
-use golang_type_decl_core::{golang_type_core::Type, type_def::JsonStructDef, TypeDecl, TypeSpec};
+use golang_type_decl_core::{
+    golang_type_core::{StructField, Type},
+    type_def::JsonStructDef,
+    TypeDecl, TypeSpec,
+};
 use proc_macro2::TokenStream;
 use quote::quote;
 
+mod field_opts;
 mod input;
 
 pub use self::input::Input;
@@ -37,9 +42,26 @@ pub fn get_output(input: Input) -> TokenStream {
         }
     };
 
+    let field_names: Vec<_> = struct_type
+        .field_decls
+        .iter()
+        .map(|field_decl| match &field_decl.struct_field {
+            StructField::IdentifierListType(names, _) => names.to_owned(),
+            StructField::EmbeddedField(embedded_field) => vec![embedded_field.name()],
+        })
+        .flatten()
+        .collect();
+    for field_name in input.field_opts.0.keys() {
+        if !field_names.contains(field_name) {
+            let err = format!("field [{}] not found", field_name);
+            return quote!(compile_error!(#err));
+        }
+    }
+
     let json_struct_def = JsonStructDef {
         name: name.to_owned(),
         struct_type: struct_type.to_owned(),
+        field_opts: input.field_opts.0,
     };
 
     quote!(#json_struct_def)

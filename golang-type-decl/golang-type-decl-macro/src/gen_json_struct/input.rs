@@ -7,18 +7,22 @@ use syn::{
 };
 use url::Url;
 
+use super::field_opts::FieldOpts;
+
 pub struct Input {
     pub code: String,
     pub nth: usize,
+    pub field_opts: FieldOpts,
 }
 
 impl Parse for Input {
     fn parse(input: ParseStream) -> Result<Self, SynError> {
         let mut code = String::new();
         let mut nth = 0;
+        let mut field_opts = FieldOpts::default();
 
         while !input.is_empty() {
-            let key: Ident = input.parse()?;
+            let key = input.parse::<Ident>()?;
             input.parse::<Token![=]>()?;
 
             if key == "code" {
@@ -37,17 +41,22 @@ impl Parse for Input {
                     }
                 }
             } else if key == "nth" {
-                let i = input.parse::<LitInt>()?.base10_parse::<usize>()?;
+                nth = input.parse::<LitInt>()?.base10_parse::<usize>()?;
                 input.parse::<Token![,]>()?;
-
-                nth = i;
+            } else if key == "field_opts" {
+                field_opts = input.parse()?;
+                input.parse::<Token![,]>()?;
             } else {
                 let err = format!("unexpected input key: {}", key);
                 return Err(SynError::new_spanned(key, err));
             }
         }
 
-        Ok(Self { code, nth })
+        Ok(Self {
+            code,
+            nth,
+            field_opts,
+        })
     }
 }
 

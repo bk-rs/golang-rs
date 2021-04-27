@@ -1,7 +1,15 @@
 use std::str;
 
+#[cfg(feature = "enable-quote-to_tokens")]
+use std::collections::HashMap;
+
 use golang_parser::tree_sitter::Node;
-use golang_type_core::{StructType, Type, TypeParseError};
+use golang_type_core::{Type, TypeParseError};
+
+#[cfg(feature = "enable-quote-to_tokens")]
+use golang_type_core::StructType;
+#[cfg(feature = "enable-quote-to_tokens")]
+use proc_macro2::TokenStream;
 
 #[derive(PartialEq, Eq, Debug, Clone)]
 pub struct TypeDef {
@@ -43,9 +51,21 @@ impl TypeDef {
     }
 }
 
+#[cfg(feature = "enable-quote-to_tokens")]
 pub struct JsonStructDef {
     pub name: String,
     pub struct_type: StructType,
+    pub field_opts: HashMap<JsonStructFieldName, JsonStructFieldOption>,
+}
+
+#[cfg(feature = "enable-quote-to_tokens")]
+pub type JsonStructFieldName = String;
+
+#[cfg(feature = "enable-quote-to_tokens")]
+#[derive(Default, Debug, Clone)]
+pub struct JsonStructFieldOption {
+    pub r#type: Option<TokenStream>,
+    pub serde_deserialize_with: Option<String>,
 }
 
 #[cfg(feature = "enable-quote-to_tokens")]
@@ -107,15 +127,23 @@ mod enable_quote_to_tokens {
                             .iter()
                             .filter(|x| x != &"_")
                             .map(|name| {
+                                let field_opt = self
+                                    .field_opts
+                                    .get(name)
+                                    .map(ToOwned::to_owned)
+                                    .unwrap_or_default();
+
                                 let field_serde_attr = JsonStructFieldSerdeAttr {
                                     rename: rename.to_owned().unwrap_or_else(|| name.to_owned()),
                                     is_omitempty,
+                                    serde_deserialize_with: field_opt.serde_deserialize_with,
                                 };
                                 let field_name = format_ident!("r#{}", name.to_case(Case::Snake));
                                 let field_type = JsonStructFieldType {
                                     r#type: *r#type.to_owned(),
                                     is_string,
                                     is_omitempty,
+                                    special_type: field_opt.r#type,
                                 };
 
                                 quote! {
@@ -125,16 +153,25 @@ mod enable_quote_to_tokens {
                             })
                             .collect(),
                         StructField::EmbeddedField(embedded_field) => {
+                            let name = embedded_field.name();
+
+                            let field_opt = self
+                                .field_opts
+                                .get(&name)
+                                .map(ToOwned::to_owned)
+                                .unwrap_or_default();
+
                             let field_serde_attr = JsonStructFieldSerdeAttr {
-                                rename: rename.unwrap_or_else(|| embedded_field.name()),
+                                rename: rename.unwrap_or_else(|| name.to_owned()),
                                 is_omitempty,
+                                serde_deserialize_with: field_opt.serde_deserialize_with,
                             };
-                            let field_name =
-                                format_ident!("r#{}", embedded_field.name().to_case(Case::Snake));
+                            let field_name = format_ident!("r#{}", name.to_case(Case::Snake));
                             let field_type = JsonStructFieldType {
                                 r#type: embedded_field.r#type(),
                                 is_string,
                                 is_omitempty,
+                                special_type: field_opt.r#type,
                             };
 
                             vec![quote! {
@@ -161,6 +198,7 @@ mod enable_quote_to_tokens {
     struct JsonStructFieldSerdeAttr {
         rename: String,
         is_omitempty: Option<bool>,
+        serde_deserialize_with: Option<String>,
     }
     impl ToTokens for JsonStructFieldSerdeAttr {
         fn to_tokens(&self, tokens: &mut TokenStream) {
@@ -173,12 +211,21 @@ mod enable_quote_to_tokens {
                 tokens.append(Punct::new(',', Spacing::Alone));
 
                 tokens.append(format_ident!("default"));
+
                 tokens.append(Punct::new(',', Spacing::Alone));
 
                 tokens.append(format_ident!("skip_serializing_if"));
                 tokens.append(Punct::new('=', Spacing::Alone));
                 let skip_serializing_if_val = "Option::is_none";
                 tokens.append_all(quote!(#skip_serializing_if_val));
+            }
+
+            if let Some(serde_deserialize_with) = &self.serde_deserialize_with {
+                tokens.append(Punct::new(',', Spacing::Alone));
+
+                tokens.append(format_ident!("deserialize_with"));
+                tokens.append(Punct::new('=', Spacing::Alone));
+                tokens.append_all(quote!(#serde_deserialize_with));
             }
         }
     }
@@ -187,9 +234,15 @@ mod enable_quote_to_tokens {
         r#type: Type,
         is_string: Option<bool>,
         is_omitempty: Option<bool>,
+        special_type: Option<TokenStream>,
     }
     impl ToTokens for JsonStructFieldType {
         fn to_tokens(&self, tokens: &mut TokenStream) {
+            if let Some(special_type) = &self.special_type {
+                tokens.append_all(special_type.to_owned());
+                return;
+            }
+
             let r#type = &self.r#type;
             let mut token = quote!(#r#type);
             if self.is_string == Some(true) {

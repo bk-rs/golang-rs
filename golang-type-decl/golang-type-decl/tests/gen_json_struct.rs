@@ -1,6 +1,7 @@
 use std::error;
 
 use golang_type_decl::gen_json_struct;
+use serde_aux::field_attributes::deserialize_bool_from_anything;
 
 #[test]
 fn simple() -> Result<(), Box<dyn error::Error>> {
@@ -47,6 +48,43 @@ fn with_nth() -> Result<(), Box<dyn error::Error>> {
         nth = 1
     );
     Foo { bar: 0 };
+
+    Ok(())
+}
+
+#[test]
+fn with_field_opts() -> Result<(), Box<dyn error::Error>> {
+    gen_json_struct!(
+        r#"
+    type User struct {
+        Age     int
+        Actived string
+    }
+    "#;
+        "Age" => {
+            "type": u8
+        },
+        "Actived" => {
+            "type": bool,
+            "serde_deserialize_with": "deserialize_bool_from_anything"
+        }
+    );
+    User {
+        age: 18_u8,
+        actived: true,
+    };
+
+    let user: User = serde_json::from_str(
+        r#"
+    {
+        "Age": 18,
+        "Actived": "1"
+    }
+    "#,
+    )?;
+
+    assert_eq!(user.age, 18);
+    assert_eq!(user.actived, true);
 
     Ok(())
 }
