@@ -17,13 +17,7 @@ impl Parse for Input {
         let mut code = String::new();
         let mut nth = 0;
 
-        let mut expect_comma = false;
-
         while !input.is_empty() {
-            if expect_comma {
-                let _ = input.parse::<Token![,]>()?;
-            }
-
             let key: Ident = input.parse()?;
             input.parse::<Token![=]>()?;
             if key == "code" {
@@ -33,8 +27,10 @@ impl Parse for Input {
                     .trim_start()
                     .trim_end()
                     .to_owned();
+                input.parse::<Token![,]>()?;
             } else if key == "path" {
                 let path = input.parse::<LitStr>()?.value();
+                input.parse::<Token![,]>()?;
 
                 let cargo_manifest_dir = match env::var("CARGO_MANIFEST_DIR") {
                     Ok(cargo_manifest_dir) => cargo_manifest_dir,
@@ -101,12 +97,11 @@ impl Parse for Input {
                 };
             } else if key == "nth" {
                 nth = input.parse::<LitInt>()?.base10_parse::<usize>()?;
+                input.parse::<Token![,]>()?;
             } else {
                 let message = format!("unexpected input key: {}", key);
                 return Err(SynError::new_spanned(key, message));
             }
-
-            expect_comma = true;
         }
 
         Ok(Self { code, nth })
