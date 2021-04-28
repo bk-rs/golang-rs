@@ -12,8 +12,10 @@ use super::field_opts::FieldOpts;
 pub struct Input {
     pub code: String,
     pub nth: usize,
-    pub skip_serde_ser: bool,
-    pub skip_serde_de: bool,
+    pub disable_derive_serde_ser: bool,
+    pub disable_derive_serde_de: bool,
+    pub disable_derive_debug: bool,
+    pub disable_derive_clone: bool,
     pub field_opts: FieldOpts,
 }
 
@@ -21,8 +23,10 @@ impl Parse for Input {
     fn parse(input: ParseStream) -> Result<Self, SynError> {
         let mut code = String::new();
         let mut nth = 0;
-        let mut skip_serde_ser = false;
-        let mut skip_serde_de = false;
+        let mut disable_derive_serde_ser = false;
+        let mut disable_derive_serde_de = false;
+        let mut disable_derive_debug = false;
+        let mut disable_derive_clone = false;
         let mut field_opts = FieldOpts::default();
 
         while !input.is_empty() {
@@ -47,11 +51,17 @@ impl Parse for Input {
             } else if key == "nth" {
                 nth = input.parse::<LitInt>()?.base10_parse::<usize>()?;
                 input.parse::<Token![,]>()?;
-            } else if key == "skip_serde_ser" {
-                skip_serde_ser = input.parse::<LitBool>()?.value();
+            } else if key == "disable_derive_serde_ser" {
+                disable_derive_serde_ser = input.parse::<LitBool>()?.value();
                 input.parse::<Token![,]>()?;
-            } else if key == "skip_serde_de" {
-                skip_serde_de = input.parse::<LitBool>()?.value();
+            } else if key == "disable_derive_serde_de" {
+                disable_derive_serde_de = input.parse::<LitBool>()?.value();
+                input.parse::<Token![,]>()?;
+            } else if key == "disable_derive_debug" {
+                disable_derive_debug = input.parse::<LitBool>()?.value();
+                input.parse::<Token![,]>()?;
+            } else if key == "disable_derive_clone" {
+                disable_derive_clone = input.parse::<LitBool>()?.value();
                 input.parse::<Token![,]>()?;
             } else if key == "field_opts" {
                 field_opts = input.parse()?;
@@ -65,8 +75,10 @@ impl Parse for Input {
         Ok(Self {
             code,
             nth,
-            skip_serde_ser,
-            skip_serde_de,
+            disable_derive_serde_ser,
+            disable_derive_serde_de,
+            disable_derive_debug,
+            disable_derive_clone,
             field_opts,
         })
     }

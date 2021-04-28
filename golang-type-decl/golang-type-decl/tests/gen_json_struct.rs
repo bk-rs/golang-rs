@@ -108,14 +108,16 @@ fn with_nth_and_field_opts() {
 }
 
 #[test]
-fn with_skip_serde_ser_and_skip_serde_de() {
+fn with_other_opts() {
     gen_json_struct!(
         r#"
     type Foo struct {
         bar uint
     }
     "#,
-        skip_serde_ser = true,
-        skip_serde_de = true
+        disable_derive_serde_ser = true,
+        disable_derive_serde_de = true,
+        disable_derive_debug = true,
+        disable_derive_clone = true
     );
 }

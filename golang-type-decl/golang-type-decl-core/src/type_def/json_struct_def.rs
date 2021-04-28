@@ -17,8 +17,22 @@ pub struct JsonStructDef {
 
 #[derive(Default, Debug)]
 pub struct JsonStructOption {
-    pub skip_serde_ser: bool,
-    pub skip_serde_de: bool,
+    pub enable_derive_serde_ser: bool,
+    pub enable_derive_serde_de: bool,
+    pub enable_derive_debug: bool,
+    pub enable_derive_clone: bool,
+}
+impl JsonStructOption {
+    fn has_derive(&self) -> bool {
+        self.enable_derive_serde_ser
+            || self.enable_derive_serde_de
+            || self.enable_derive_debug
+            || self.enable_derive_clone
+    }
+
+    fn has_serde_derive(&self) -> bool {
+        self.enable_derive_serde_ser || self.enable_derive_serde_de
+    }
 }
 
 pub type JsonStructFieldName = String;
@@ -26,7 +40,7 @@ pub type JsonStructFieldName = String;
 #[derive(Default, Debug, Clone)]
 pub struct JsonStructFieldOption {
     pub special_type: Option<TokenStream>,
-    pub serde_deserialize_with: Option<String>,
+    pub attr_serde_deserialize_with: Option<String>,
 }
 
 impl ToTokens for JsonStructDef {
@@ -81,13 +95,6 @@ impl ToTokens for JsonStructDef {
                                 .map(ToOwned::to_owned)
                                 .unwrap_or_default();
 
-                            let field_serde_attr = JsonStructFieldSerdeAttr {
-                                rename: rename.to_owned().unwrap_or_else(|| name.to_owned()),
-                                is_omitempty,
-                                serde_deserialize_with: field_opt.serde_deserialize_with,
-                                skip_serde_ser: self.opt.skip_serde_ser,
-                                skip_serde_de: self.opt.skip_serde_de,
-                            };
                             let field_name = format_ident!("r#{}", name.to_case(Case::Snake));
                             let field_type = JsonStructFieldType {
                                 r#type: *r#type.to_owned(),
@@ -96,13 +103,22 @@ impl ToTokens for JsonStructDef {
                                 special_type: field_opt.special_type,
                             };
 
-                            if self.opt.skip_serde_ser && self.opt.skip_serde_de {
+                            if self.opt.has_serde_derive() {
+                                let field_serde_attr = JsonStructFieldSerdeAttr {
+                                    rename: rename.to_owned().unwrap_or_else(|| name.to_owned()),
+                                    is_omitempty,
+                                    attr_serde_deserialize_with: field_opt
+                                        .attr_serde_deserialize_with,
+                                    enable_serde_ser: self.opt.enable_derive_serde_ser,
+                                    enable_serde_de: self.opt.enable_derive_serde_de,
+                                };
+
                                 quote! {
+                                    #[serde(#field_serde_attr)]
                                     pub #field_name: #field_type,
                                 }
                             } else {
                                 quote! {
-                                    #[serde(#field_serde_attr)]
                                     pub #field_name: #field_type,
                                 }
                             }
@@ -117,13 +133,6 @@ impl ToTokens for JsonStructDef {
                             .map(ToOwned::to_owned)
                             .unwrap_or_default();
 
-                        let field_serde_attr = JsonStructFieldSerdeAttr {
-                            rename: rename.unwrap_or_else(|| name.to_owned()),
-                            is_omitempty,
-                            serde_deserialize_with: field_opt.serde_deserialize_with,
-                            skip_serde_ser: self.opt.skip_serde_ser,
-                            skip_serde_de: self.opt.skip_serde_de,
-                        };
                         let field_name = format_ident!("r#{}", name.to_case(Case::Snake));
                         let field_type = JsonStructFieldType {
                             r#type: embedded_field.r#type(),
@@ -132,31 +141,51 @@ impl ToTokens for JsonStructDef {
                             special_type: field_opt.special_type,
                         };
 
-                        vec![if self.opt.skip_serde_ser && self.opt.skip_serde_de {
-                            quote! {
-                                pub #field_name: #field_type,
-                            }
-                        } else {
+                        let token_stream = if self.opt.has_serde_derive() {
+                            let field_serde_attr = JsonStructFieldSerdeAttr {
+                                rename: rename.unwrap_or_else(|| name.to_owned()),
+                                is_omitempty,
+                                attr_serde_deserialize_with: field_opt.attr_serde_deserialize_with,
+                                enable_serde_ser: self.opt.enable_derive_serde_ser,
+                                enable_serde_de: self.opt.enable_derive_serde_de,
+                            };
+
                             quote! {
                                 #[serde(#field_serde_attr)]
                                 pub #field_name: #field_type,
                             }
-                        }]
+                        } else {
+                            quote! {
+                                pub #field_name: #field_type,
+                            }
+                        };
+
+                        vec![token_stream]
                     }
                 }
             })
             .flatten()
             .collect();
 
-        let serde_derive = JsonStructSerdeDerive {
-            skip_serde_ser: self.opt.skip_serde_ser,
-            skip_serde_de: self.opt.skip_serde_de,
-        };
+        let token = if self.opt.has_derive() {
+            let derive_attr = JsonStructSerdeDeriveAttr {
+                enable_serde_ser: self.opt.enable_derive_serde_ser,
+                enable_serde_de: self.opt.enable_derive_serde_de,
+                enable_debug: self.opt.enable_derive_debug,
+                enable_clone: self.opt.enable_derive_clone,
+            };
 
-        let token = quote! {
-            #[derive(#serde_derive Debug, Clone)]
-            pub struct #struct_name {
-                #(#struct_fields)*
+            quote! {
+                #[derive(#derive_attr)]
+                pub struct #struct_name {
+                    #(#struct_fields)*
+                }
+            }
+        } else {
+            quote! {
+                pub struct #struct_name {
+                    #(#struct_fields)*
+                }
             }
         };
 
@@ -164,22 +193,31 @@ impl ToTokens for JsonStructDef {
     }
 }
 
-struct JsonStructSerdeDerive {
-    skip_serde_ser: bool,
-    skip_serde_de: bool,
+struct JsonStructSerdeDeriveAttr {
+    enable_serde_ser: bool,
+    enable_serde_de: bool,
+    enable_debug: bool,
+    enable_clone: bool,
 }
-impl ToTokens for JsonStructSerdeDerive {
+impl ToTokens for JsonStructSerdeDeriveAttr {
     fn to_tokens(&self, tokens: &mut TokenStream) {
-        if !self.skip_serde_de {
+        if self.enable_serde_de {
             tokens.append_all(quote!(::serde::Deserialize));
-
             tokens.append(Punct::new(',', Spacing::Alone));
         }
 
-        if !self.skip_serde_ser {
+        if self.enable_serde_ser {
             tokens.append_all(quote!(::serde::Serialize));
-
             tokens.append(Punct::new(',', Spacing::Alone));
+        }
+
+        if self.enable_debug {
+            tokens.append_all(quote!(Debug));
+            tokens.append(Punct::new(',', Spacing::Alone));
+        }
+
+        if self.enable_clone {
+            tokens.append_all(quote!(Clone));
         }
     }
 }
@@ -187,9 +225,9 @@ impl ToTokens for JsonStructSerdeDerive {
 struct JsonStructFieldSerdeAttr {
     rename: String,
     is_omitempty: Option<bool>,
-    serde_deserialize_with: Option<String>,
-    skip_serde_ser: bool,
-    skip_serde_de: bool,
+    attr_serde_deserialize_with: Option<String>,
+    enable_serde_ser: bool,
+    enable_serde_de: bool,
 }
 impl ToTokens for JsonStructFieldSerdeAttr {
     fn to_tokens(&self, tokens: &mut TokenStream) {
@@ -203,7 +241,7 @@ impl ToTokens for JsonStructFieldSerdeAttr {
 
             tokens.append(format_ident!("default"));
 
-            if !self.skip_serde_ser {
+            if self.enable_serde_ser {
                 tokens.append(Punct::new(',', Spacing::Alone));
 
                 tokens.append(format_ident!("skip_serializing_if"));
@@ -213,8 +251,8 @@ impl ToTokens for JsonStructFieldSerdeAttr {
             }
         }
 
-        if let Some(serde_deserialize_with) = &self.serde_deserialize_with {
-            if !self.skip_serde_de {
+        if let Some(serde_deserialize_with) = &self.attr_serde_deserialize_with {
+            if self.enable_serde_de {
                 tokens.append(Punct::new(',', Spacing::Alone));
 
                 tokens.append(format_ident!("deserialize_with"));

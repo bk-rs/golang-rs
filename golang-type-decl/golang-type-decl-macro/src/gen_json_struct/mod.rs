@@ -62,8 +62,10 @@ pub fn get_output(input: Input) -> TokenStream {
         name: name.to_owned(),
         struct_type: struct_type.to_owned(),
         opt: JsonStructOption {
-            skip_serde_ser: input.skip_serde_ser,
-            skip_serde_de: input.skip_serde_de,
+            enable_derive_serde_ser: !input.disable_derive_serde_ser,
+            enable_derive_serde_de: !input.disable_derive_serde_de,
+            enable_derive_debug: !input.disable_derive_debug,
+            enable_derive_clone: !input.disable_derive_clone,
         },
         field_opts: input.field_opts.0,
     };
