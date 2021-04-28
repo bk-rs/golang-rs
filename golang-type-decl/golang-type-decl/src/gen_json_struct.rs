@@ -14,22 +14,22 @@ macro_rules! gen_json_struct {
     };
     (
         $code:literal;
-        $( $field:literal => { $( $field_opt_k:literal : $field_opt_v:tt ),* $(,)? } ),* $(,)?
+        $( $field_opt_name:literal => { $( $field_opt_k:literal : $field_opt_v:tt ),* $(,)? } ),* $(,)?
     ) => {
         golang_type_decl_macro::gen_json_struct!(
             code = $code,
-            field_opts = $( $field => $( $field_opt_k -> $field_opt_v ,)* ,)* ,
+            field_opts = $( $field_opt_name => $( $field_opt_k -> $field_opt_v ,)* ,)* ,
         );
     };
     (
         $code:literal,
         $( $opt_k:ident = $opt_v:literal ),+ $(,)?;
-        $( $field:literal => { $( $field_opt_k:literal : $field_opt_v:tt ),* $(,)? } ),* $(,)?
+        $( $field_opt_name:literal => { $( $field_opt_k:literal : $field_opt_v:tt ),* $(,)? } ),* $(,)?
     ) => {
         golang_type_decl_macro::gen_json_struct!(
             code = $code,
             $( $opt_k = $opt_v ,)*
-            field_opts = $( $field => $( $field_opt_k -> $field_opt_v ,)* ,)* ,
+            field_opts = $( $field_opt_name => $( $field_opt_k -> $field_opt_v ,)* ,)* ,
         );
     };
 }
@@ -50,22 +50,22 @@ macro_rules! gen_json_struct_from_file {
     };
     (
         $path:literal;
-        $( $field:literal => { $( $field_opt_k:literal : $field_opt_v:tt ),* $(,)? } ),* $(,)?
+        $( $field_opt_name:literal => { $( $field_opt_k:literal : $field_opt_v:tt ),* $(,)? } ),* $(,)?
     ) => {
         golang_type_decl_macro::gen_json_struct!(
             path = $path,
-            field_opts = $( $field => $( $field_opt_k -> $field_opt_v ,)* ,)* ,
+            field_opts = $( $field_opt_name => $( $field_opt_k -> $field_opt_v ,)* ,)* ,
         );
     };
     (
         $path:literal,
         $( $opt_k:ident = $opt_v:literal ),+ $(,)?;
-        $( $field:literal => { $( $field_opt_k:literal : $field_opt_v:tt ),* $(,)? } ),* $(,)?
+        $( $field_opt_name:literal => { $( $field_opt_k:literal : $field_opt_v:tt ),* $(,)? } ),* $(,)?
     ) => {
         golang_type_decl_macro::gen_json_struct!(
             path = $path,
             $( $opt_k = $opt_v ,)*
-            field_opts = $( $field => $( $field_opt_k -> $field_opt_v ,)* ,)* ,
+            field_opts = $( $field_opt_name => $( $field_opt_k -> $field_opt_v ,)* ,)* ,
         );
     };
 }
