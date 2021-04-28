@@ -29,9 +29,9 @@ impl Parse for FieldOpts {
                     if field_opt_k == "special_type" {
                         let special_type = input.parse::<Type>()?;
                         field_opt.special_type = Some(quote!(#special_type));
-                    } else if field_opt_k == "serde_deserialize_with" {
-                        let serde_deserialize_with = input.parse::<LitStr>()?.value();
-                        field_opt.attr_serde_deserialize_with = Some(serde_deserialize_with);
+                    } else if field_opt_k == "attr_serde_deserialize_with" {
+                        let attr_serde_deserialize_with = input.parse::<LitStr>()?.value();
+                        field_opt.attr_serde_deserialize_with = Some(attr_serde_deserialize_with);
                     } else {
                         let err = format!("unexpected opt key: {}", field_opt_k);
                         return Err(SynError::new_spanned(field_opt_k, err));

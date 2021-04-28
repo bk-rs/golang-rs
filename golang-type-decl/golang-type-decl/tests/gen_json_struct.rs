@@ -64,7 +64,7 @@ fn with_field_opts() -> Result<(), Box<dyn error::Error>> {
         },
         "Actived" => {
             "special_type": bool,
-            "serde_deserialize_with": "deserialize_bool_from_anything"
+            "attr_serde_deserialize_with": "deserialize_bool_from_anything"
         }
     );
     User {
