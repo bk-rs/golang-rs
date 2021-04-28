@@ -141,7 +141,7 @@ impl ToTokens for JsonStructDef {
                             special_type: field_opt.special_type,
                         };
 
-                        let token_stream = if self.opt.has_serde_derive() {
+                        let token = if self.opt.has_serde_derive() {
                             let field_serde_attr = JsonStructFieldSerdeAttr {
                                 rename: rename.unwrap_or_else(|| name.to_owned()),
                                 is_omitempty,
@@ -160,7 +160,7 @@ impl ToTokens for JsonStructDef {
                             }
                         };
 
-                        vec![token_stream]
+                        vec![token]
                     }
                 }
             })
@@ -275,13 +275,16 @@ impl ToTokens for JsonStructFieldType {
             special_type.to_owned()
         } else {
             let r#type = &self.r#type;
-            quote!(#r#type)
+            let mut token = quote!(#r#type);
+
+            if self.is_string == Some(true) {
+                let r#type = Type::TypeName(TypeName::String);
+                token = quote!(#r#type);
+            }
+
+            token
         };
 
-        if self.is_string == Some(true) {
-            let r#type = Type::TypeName(TypeName::String);
-            token = quote!(#r#type);
-        }
         if self.is_omitempty == Some(true) {
             let mut tokens_tmp = TokenStream::new();
             tokens_tmp.append_all(quote!(::core::option::Option));
