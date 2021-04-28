@@ -51,7 +51,7 @@ fn with_nth() {
 }
 
 #[test]
-fn with_field_opts() -> Result<(), Box<dyn error::Error>> {
+fn with_field_types_and_field_opts() -> Result<(), Box<dyn error::Error>> {
     gen_json_struct!(
         r#"
     type User struct {
@@ -59,11 +59,10 @@ fn with_field_opts() -> Result<(), Box<dyn error::Error>> {
         Actived string
     }
     "#;
-        "Age" => {
-            "special_type": u8
-        },
+        "Age" => u8,
+        "Actived" => bool
+    ;
         "Actived" => {
-            "special_type": bool,
             "attr_serde_deserialize_with": "deserialize_bool_from_anything"
         }
     );
@@ -88,7 +87,7 @@ fn with_field_opts() -> Result<(), Box<dyn error::Error>> {
 }
 
 #[test]
-fn with_nth_and_field_opts() {
+fn with_nth_and_field_types() {
     gen_json_struct!(
         r#"
     type (
@@ -100,11 +99,9 @@ fn with_nth_and_field_opts() {
     "#,
         nth = 1
     ;
-        "bar" => {
-            "special_type": bool
-        }
+        "bar" => Option<bool>
     );
-    Foo { bar: true };
+    Foo { bar: None };
 }
 
 #[test]

@@ -1,5 +1,6 @@
 use std::{env, fs, path::PathBuf};
 
+use quote::quote;
 use regex::Regex;
 use syn::{
     parse::{Parse, ParseStream},
@@ -7,15 +8,17 @@ use syn::{
 };
 use url::Url;
 
-use super::field_opts::FieldOpts;
+use super::{field_opts::FieldOpts, field_types::FieldTypes};
 
 pub struct Input {
     pub code: String,
     pub nth: usize,
+    //
     pub disable_derive_serde_ser: bool,
     pub disable_derive_serde_de: bool,
     pub disable_derive_debug: bool,
     pub disable_derive_clone: bool,
+    //
     pub field_opts: FieldOpts,
 }
 
@@ -23,10 +26,13 @@ impl Parse for Input {
     fn parse(input: ParseStream) -> Result<Self, SynError> {
         let mut code = String::new();
         let mut nth = 0;
+
         let mut disable_derive_serde_ser = false;
         let mut disable_derive_serde_de = false;
         let mut disable_derive_debug = false;
         let mut disable_derive_clone = false;
+
+        let mut field_types = FieldTypes::default();
         let mut field_opts = FieldOpts::default();
 
         while !input.is_empty() {
@@ -63,6 +69,9 @@ impl Parse for Input {
             } else if key == "disable_derive_clone" {
                 disable_derive_clone = input.parse::<LitBool>()?.value();
                 input.parse::<Token![,]>()?;
+            } else if key == "field_types" {
+                field_types = input.parse()?;
+                input.parse::<Token![,]>()?;
             } else if key == "field_opts" {
                 field_opts = input.parse()?;
                 input.parse::<Token![,]>()?;
@@ -70,6 +79,11 @@ impl Parse for Input {
                 let err = format!("unexpected input key: {}", key);
                 return Err(SynError::new_spanned(key, err));
             }
+        }
+
+        for (field_name, field_type) in field_types.0 {
+            let field_opt = field_opts.0.entry(field_name).or_default();
+            field_opt.special_type = Some(quote!(#field_type));
         }
 
         Ok(Self {

@@ -3,10 +3,9 @@ use std::collections::HashMap;
 use golang_type_decl_core::type_def::json_struct_def::{
     JsonStructFieldName, JsonStructFieldOption,
 };
-use quote::quote;
 use syn::{
     parse::{Parse, ParseStream},
-    Error as SynError, LitStr, Token, Type,
+    Error as SynError, LitStr, Token,
 };
 
 #[derive(Default)]
@@ -26,10 +25,7 @@ impl Parse for FieldOpts {
                 if input.peek(LitStr) && input.peek2(Token![->]) {
                     let field_opt_k = input.parse::<LitStr>()?.value();
                     input.parse::<Token![->]>()?;
-                    if field_opt_k == "special_type" {
-                        let special_type = input.parse::<Type>()?;
-                        field_opt.special_type = Some(quote!(#special_type));
-                    } else if field_opt_k == "attr_serde_deserialize_with" {
+                    if field_opt_k == "attr_serde_deserialize_with" {
                         let attr_serde_deserialize_with = input.parse::<LitStr>()?.value();
                         field_opt.attr_serde_deserialize_with = Some(attr_serde_deserialize_with);
                     } else {

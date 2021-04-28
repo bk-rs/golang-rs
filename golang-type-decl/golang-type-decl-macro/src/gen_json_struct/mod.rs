@@ -7,6 +7,7 @@ use proc_macro2::TokenStream;
 use quote::quote;
 
 mod field_opts;
+mod field_types;
 mod input;
 
 pub use self::input::Input;
