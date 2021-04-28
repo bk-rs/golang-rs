@@ -1,6 +1,6 @@
 use golang_type_decl_core::{
     golang_type_core::{StructField, Type},
-    type_def::{JsonStructDef, JsonStructOption},
+    type_def::json_struct_def::{JsonStructDef, JsonStructOption},
     TypeDecl, TypeSpec,
 };
 use proc_macro2::TokenStream;
