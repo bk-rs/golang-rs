@@ -21,6 +21,8 @@ pub struct JsonStructOption {
     pub enable_derive_serde_de: bool,
     pub enable_derive_debug: bool,
     pub enable_derive_clone: bool,
+    //
+    pub alias_name: Option<String>,
 }
 impl JsonStructOption {
     fn has_derive(&self) -> bool {
@@ -47,7 +49,13 @@ pub struct JsonStructFieldOption {
 
 impl ToTokens for JsonStructDef {
     fn to_tokens(&self, tokens: &mut TokenStream) {
-        let struct_name = format_ident!("{}", self.name.to_case(Case::Pascal));
+        let struct_name = format_ident!(
+            "{}",
+            self.opt
+                .alias_name
+                .to_owned()
+                .unwrap_or_else(|| self.name.to_case(Case::Pascal))
+        );
         let struct_fields: Vec<_> = self
             .struct_type
             .field_decls

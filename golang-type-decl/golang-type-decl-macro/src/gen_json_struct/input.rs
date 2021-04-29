@@ -18,6 +18,8 @@ pub struct Input {
     pub disable_derive_serde_de: bool,
     pub disable_derive_debug: bool,
     pub disable_derive_clone: bool,
+
+    pub alias_name: Option<String>,
     //
     pub field_opts: FieldOpts,
 }
@@ -31,6 +33,8 @@ impl Parse for Input {
         let mut disable_derive_serde_de = false;
         let mut disable_derive_debug = false;
         let mut disable_derive_clone = false;
+
+        let mut alias_name = None;
 
         let mut field_types = FieldTypes::default();
         let mut field_opts = FieldOpts::default();
@@ -69,6 +73,9 @@ impl Parse for Input {
             } else if key == "disable_derive_clone" {
                 disable_derive_clone = input.parse::<LitBool>()?.value();
                 input.parse::<Token![,]>()?;
+            } else if key == "alias_name" {
+                alias_name = Some(input.parse::<LitStr>()?.value());
+                input.parse::<Token![,]>()?;
             } else if key == "field_types" {
                 field_types = input.parse()?;
                 input.parse::<Token![,]>()?;
@@ -93,6 +100,7 @@ impl Parse for Input {
             disable_derive_serde_de,
             disable_derive_debug,
             disable_derive_clone,
+            alias_name,
             field_opts,
         })
     }

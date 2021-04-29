@@ -67,6 +67,7 @@ pub fn get_output(input: Input) -> TokenStream {
             enable_derive_serde_de: !input.disable_derive_serde_de,
             enable_derive_debug: !input.disable_derive_debug,
             enable_derive_clone: !input.disable_derive_clone,
+            alias_name: input.alias_name,
         },
         field_opts: input.field_opts.0,
     };
