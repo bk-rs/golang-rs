@@ -72,9 +72,6 @@ impl ToTokens for JsonStructDef {
                 } else {
                     None
                 };
-                if is_ignored == Some(true) {
-                    return vec![];
-                }
 
                 let rename = if let Some(JsonStructTag::Normal(rename, _)) = as_json_struct_tag {
                     rename.to_owned()
@@ -108,6 +105,7 @@ impl ToTokens for JsonStructDef {
                             let field_name = format_ident!("r#{}", name.to_case(Case::Snake));
                             let field_type = JsonStructFieldType {
                                 r#type: *r#type.to_owned(),
+                                is_ignored,
                                 is_string,
                                 is_omitempty,
                                 special_type: field_opt.special_type,
@@ -117,6 +115,7 @@ impl ToTokens for JsonStructDef {
                             if self.opt.has_serde_derive() {
                                 let field_serde_attr = JsonStructFieldSerdeAttr {
                                     rename: rename.to_owned().unwrap_or_else(|| name.to_owned()),
+                                    is_ignored,
                                     is_omitempty,
                                     attr_serde_deserialize_with: field_opt
                                         .attr_serde_deserialize_with,
@@ -147,6 +146,7 @@ impl ToTokens for JsonStructDef {
                         let field_name = format_ident!("r#{}", name.to_case(Case::Snake));
                         let field_type = JsonStructFieldType {
                             r#type: embedded_field.r#type(),
+                            is_ignored,
                             is_string,
                             is_omitempty,
                             special_type: field_opt.special_type,
@@ -156,6 +156,7 @@ impl ToTokens for JsonStructDef {
                         let token = if self.opt.has_serde_derive() {
                             let field_serde_attr = JsonStructFieldSerdeAttr {
                                 rename: rename.unwrap_or_else(|| name.to_owned()),
+                                is_ignored,
                                 is_omitempty,
                                 attr_serde_deserialize_with: field_opt.attr_serde_deserialize_with,
                                 enable_serde_ser: self.opt.enable_derive_serde_ser,
@@ -236,6 +237,7 @@ impl ToTokens for JsonStructSerdeDeriveAttr {
 
 struct JsonStructFieldSerdeAttr {
     rename: String,
+    is_ignored: Option<bool>,
     is_omitempty: Option<bool>,
     attr_serde_deserialize_with: Option<String>,
     enable_serde_ser: bool,
@@ -248,7 +250,17 @@ impl ToTokens for JsonStructFieldSerdeAttr {
         let rename = &self.rename;
         tokens.append_all(quote!(#rename));
 
-        if self.is_omitempty == Some(true) {
+        if self.is_ignored == Some(true) {
+            tokens.append(Punct::new(',', Spacing::Alone));
+
+            tokens.append(format_ident!("default"));
+
+            if self.enable_serde_ser {
+                tokens.append(Punct::new(',', Spacing::Alone));
+
+                tokens.append(format_ident!("skip_serializing"));
+            }
+        } else if self.is_omitempty == Some(true) {
             tokens.append(Punct::new(',', Spacing::Alone));
 
             tokens.append(format_ident!("default"));
@@ -277,6 +289,7 @@ impl ToTokens for JsonStructFieldSerdeAttr {
 
 struct JsonStructFieldType {
     r#type: Type,
+    is_ignored: Option<bool>,
     is_string: Option<bool>,
     is_omitempty: Option<bool>,
     special_type: Option<TokenStream>,
@@ -302,7 +315,7 @@ impl ToTokens for JsonStructFieldType {
             token
         };
 
-        if self.is_omitempty == Some(true) {
+        if self.is_ignored == Some(true) || self.is_omitempty == Some(true) {
             let mut tokens_tmp = TokenStream::new();
             tokens_tmp.append_all(quote!(::core::option::Option));
             tokens_tmp.append(Punct::new('<', Spacing::Alone));

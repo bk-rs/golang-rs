@@ -12,6 +12,7 @@ fn simple() -> Result<(), Box<dyn error::Error>> {
         Age    uint   `json:",string"`
         Gender string `json:",omitempty"`
         Addr   string `json:"Address"`
+        CreatedAt   int    `json:"-"`
     }
     "#
     );
@@ -30,6 +31,7 @@ fn simple() -> Result<(), Box<dyn error::Error>> {
     assert_eq!(user.age, "20");
     assert_eq!(user.gender, None);
     assert_eq!(user.addr, "bar");
+    assert_eq!(user.created_at, None);
 
     Ok(())
 }
