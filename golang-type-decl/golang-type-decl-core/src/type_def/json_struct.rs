@@ -8,7 +8,7 @@ use golang_type_core::{
 use proc_macro2::{Punct, Spacing, TokenStream};
 use quote::{format_ident, quote, ToTokens, TokenStreamExt as _};
 
-pub struct JsonStructDef {
+pub struct JsonStruct {
     pub name: String,
     pub struct_type: StructType,
     pub opt: JsonStructOption,
@@ -47,7 +47,7 @@ pub struct JsonStructFieldOption {
     pub box_type: bool,
 }
 
-impl ToTokens for JsonStructDef {
+impl ToTokens for JsonStruct {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         let struct_name = format_ident!(
             "{}",

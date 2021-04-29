@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use golang_type_decl_core::type_def::json_struct_def::JsonStructFieldName;
+use golang_type_decl_core::type_def::json_struct::JsonStructFieldName;
 use syn::{
     parse::{Parse, ParseStream},
     Error as SynError, LitStr, Token, Type,

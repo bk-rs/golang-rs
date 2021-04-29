@@ -4,7 +4,7 @@ use golang_parser::tree_sitter::Node;
 use golang_type_core::{Type, TypeParseError};
 
 #[cfg(feature = "enable-quote-to_tokens")]
-pub mod json_struct_def;
+pub mod json_struct;
 
 #[derive(PartialEq, Eq, Debug, Clone)]
 pub struct TypeDef {

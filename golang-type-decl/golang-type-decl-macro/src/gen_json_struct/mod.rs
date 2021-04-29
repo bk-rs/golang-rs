@@ -1,6 +1,6 @@
 use golang_type_decl_core::{
     golang_type_core::{StructField, Type},
-    type_def::json_struct_def::{JsonStructDef, JsonStructOption},
+    type_def::json_struct::{JsonStruct, JsonStructOption},
     TypeDecl, TypeSpec,
 };
 use proc_macro2::TokenStream;
@@ -59,7 +59,7 @@ pub fn get_output(input: Input) -> TokenStream {
         }
     }
 
-    let json_struct_def = JsonStructDef {
+    let json_struct = JsonStruct {
         name: name.to_owned(),
         struct_type: struct_type.to_owned(),
         opt: JsonStructOption {
@@ -72,5 +72,5 @@ pub fn get_output(input: Input) -> TokenStream {
         field_opts: input.field_opts.0,
     };
 
-    quote!(#json_struct_def)
+    quote!(#json_struct)
 }
