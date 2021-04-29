@@ -40,8 +40,9 @@ pub type JsonStructFieldName = String;
 #[derive(Default, Debug, Clone)]
 pub struct JsonStructFieldOption {
     pub special_type: Option<TokenStream>,
-    pub box_type: bool,
+    //
     pub attr_serde_deserialize_with: Option<String>,
+    pub box_type: bool,
 }
 
 impl ToTokens for JsonStructDef {
