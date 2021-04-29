@@ -23,3 +23,14 @@ fn with_nth_and_field_types() {
     gen_json_struct_from_file!("tests/files/simple.go#L25-L30", nth = 1; "bar" => bool);
     Foo { bar: true };
 }
+
+#[test]
+fn with_box_type() {
+    type Comparable = isize;
+
+    gen_json_struct_from_file!(
+        "tests/files/simple.go#L16-L19";
+        "left" => { "box_type": true },
+        "right" => { "box_type": true }
+    );
+}

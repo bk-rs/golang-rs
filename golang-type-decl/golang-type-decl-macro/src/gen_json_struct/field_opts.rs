@@ -5,7 +5,7 @@ use golang_type_decl_core::type_def::json_struct_def::{
 };
 use syn::{
     parse::{Parse, ParseStream},
-    Error as SynError, LitStr, Token,
+    Error as SynError, LitBool, LitStr, Token,
 };
 
 #[derive(Default)]
@@ -28,6 +28,9 @@ impl Parse for FieldOpts {
                     if field_opt_k == "attr_serde_deserialize_with" {
                         let attr_serde_deserialize_with = input.parse::<LitStr>()?.value();
                         field_opt.attr_serde_deserialize_with = Some(attr_serde_deserialize_with);
+                    } else if field_opt_k == "box_type" {
+                        let box_type = input.parse::<LitBool>()?.value();
+                        field_opt.box_type = box_type;
                     } else {
                         let err = format!("unexpected opt key: {}", field_opt_k);
                         return Err(SynError::new_spanned(field_opt_k, err));

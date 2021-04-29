@@ -40,6 +40,7 @@ pub type JsonStructFieldName = String;
 #[derive(Default, Debug, Clone)]
 pub struct JsonStructFieldOption {
     pub special_type: Option<TokenStream>,
+    pub box_type: bool,
     pub attr_serde_deserialize_with: Option<String>,
 }
 
@@ -101,6 +102,7 @@ impl ToTokens for JsonStructDef {
                                 is_string,
                                 is_omitempty,
                                 special_type: field_opt.special_type,
+                                box_type: field_opt.box_type,
                             };
 
                             if self.opt.has_serde_derive() {
@@ -139,6 +141,7 @@ impl ToTokens for JsonStructDef {
                             is_string,
                             is_omitempty,
                             special_type: field_opt.special_type,
+                            box_type: field_opt.box_type,
                         };
 
                         let token = if self.opt.has_serde_derive() {
@@ -268,6 +271,7 @@ struct JsonStructFieldType {
     is_string: Option<bool>,
     is_omitempty: Option<bool>,
     special_type: Option<TokenStream>,
+    box_type: bool,
 }
 impl ToTokens for JsonStructFieldType {
     fn to_tokens(&self, tokens: &mut TokenStream) {
@@ -275,7 +279,11 @@ impl ToTokens for JsonStructFieldType {
             special_type.to_owned()
         } else {
             let r#type = &self.r#type;
-            let mut token = quote!(#r#type);
+            let mut token = if self.box_type {
+                quote!(Box<#r#type>)
+            } else {
+                quote!(#r#type)
+            };
 
             if self.is_string == Some(true) {
                 let r#type = Type::TypeName(TypeName::String);
