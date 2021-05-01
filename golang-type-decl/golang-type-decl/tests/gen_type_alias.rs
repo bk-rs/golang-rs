@@ -35,9 +35,8 @@ fn with_nth_and_type() {
         }
     )
     "#,
+        Option<bool>,
         nth = 0
-    ;
-        type = Option<bool>
     );
 
     let _: Bar = None;

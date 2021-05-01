@@ -46,7 +46,7 @@ impl Parse for Input {
             } else if key == "alias_name" {
                 alias_name = Some(input.parse::<LitStr>()?.value());
                 input.parse::<Token![,]>()?;
-            } else if key == "ty" {
+            } else if key == "type_" {
                 r#type = Some(input.parse::<Type>()?);
                 input.parse::<Token![,]>()?;
             } else {
