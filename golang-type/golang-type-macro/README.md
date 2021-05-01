@@ -1,1 +1,1 @@
-../golang-type/README.md
+../README.md

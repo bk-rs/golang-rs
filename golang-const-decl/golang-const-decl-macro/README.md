@@ -1,1 +1,1 @@
-../golang-const-decl/README.md
+../README.md

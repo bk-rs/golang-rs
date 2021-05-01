@@ -1,1 +1,1 @@
-../golang-var-decl/README.md
+../README.md
