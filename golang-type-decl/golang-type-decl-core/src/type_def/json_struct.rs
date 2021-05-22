@@ -19,8 +19,7 @@ pub struct JsonStruct {
 pub struct JsonStructOption {
     pub enable_derive_serde_ser: bool,
     pub enable_derive_serde_de: bool,
-    pub enable_derive_debug: bool,
-    pub enable_derive_clone: bool,
+    pub custom_derive: Vec<String>,
     //
     pub alias_name: Option<String>,
 }
@@ -28,8 +27,7 @@ impl JsonStructOption {
     fn has_derive(&self) -> bool {
         self.enable_derive_serde_ser
             || self.enable_derive_serde_de
-            || self.enable_derive_debug
-            || self.enable_derive_clone
+            || !self.custom_derive.is_empty()
     }
 
     fn has_serde_derive(&self) -> bool {
@@ -184,8 +182,7 @@ impl ToTokens for JsonStruct {
             let derive_attr = JsonStructSerdeDeriveAttr {
                 enable_serde_ser: self.opt.enable_derive_serde_ser,
                 enable_serde_de: self.opt.enable_derive_serde_de,
-                enable_debug: self.opt.enable_derive_debug,
-                enable_clone: self.opt.enable_derive_clone,
+                custom: self.opt.custom_derive.to_owned(),
             };
 
             quote! {
@@ -209,8 +206,7 @@ impl ToTokens for JsonStruct {
 struct JsonStructSerdeDeriveAttr {
     enable_serde_ser: bool,
     enable_serde_de: bool,
-    enable_debug: bool,
-    enable_clone: bool,
+    custom: Vec<String>,
 }
 impl ToTokens for JsonStructSerdeDeriveAttr {
     fn to_tokens(&self, tokens: &mut TokenStream) {
@@ -224,13 +220,10 @@ impl ToTokens for JsonStructSerdeDeriveAttr {
             tokens.append(Punct::new(',', Spacing::Alone));
         }
 
-        if self.enable_debug {
-            tokens.append_all(quote!(Debug));
+        for custom in &self.custom {
+            let custom = format_ident!("{}", custom);
+            tokens.append_all(quote!(#custom));
             tokens.append(Punct::new(',', Spacing::Alone));
-        }
-
-        if self.enable_clone {
-            tokens.append_all(quote!(Clone));
         }
     }
 }

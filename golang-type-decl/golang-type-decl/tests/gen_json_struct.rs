@@ -116,10 +116,9 @@ fn with_other_opts() {
     "#,
         disable_derive_serde_ser = true,
         disable_derive_serde_de = true,
-        disable_derive_debug = true,
-        disable_derive_clone = true,
+        custom_derive = "Debug, Clone, Default",
         alias_name = "Bar"
     );
 
-    Bar { bar: 1_usize };
+    println!("{:?}", Bar::default().clone());
 }

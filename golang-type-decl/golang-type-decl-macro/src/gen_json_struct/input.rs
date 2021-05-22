@@ -14,8 +14,7 @@ pub struct Input {
     //
     pub disable_derive_serde_ser: bool,
     pub disable_derive_serde_de: bool,
-    pub disable_derive_debug: bool,
-    pub disable_derive_clone: bool,
+    pub custom_derive: Vec<String>,
 
     pub alias_name: Option<String>,
     //
@@ -29,8 +28,7 @@ impl Parse for Input {
 
         let mut disable_derive_serde_ser = false;
         let mut disable_derive_serde_de = false;
-        let mut disable_derive_debug = false;
-        let mut disable_derive_clone = false;
+        let mut custom_derive = vec![];
 
         let mut alias_name = None;
 
@@ -65,11 +63,11 @@ impl Parse for Input {
             } else if key == "disable_derive_serde_de" {
                 disable_derive_serde_de = input.parse::<LitBool>()?.value();
                 input.parse::<Token![,]>()?;
-            } else if key == "disable_derive_debug" {
-                disable_derive_debug = input.parse::<LitBool>()?.value();
-                input.parse::<Token![,]>()?;
-            } else if key == "disable_derive_clone" {
-                disable_derive_clone = input.parse::<LitBool>()?.value();
+            } else if key == "custom_derive" {
+                let s = input.parse::<LitStr>()?.value();
+                if !s.is_empty() {
+                    custom_derive = s.split(",").map(|x| x.trim().to_owned()).collect()
+                };
                 input.parse::<Token![,]>()?;
             } else if key == "alias_name" {
                 alias_name = Some(input.parse::<LitStr>()?.value());
@@ -96,8 +94,7 @@ impl Parse for Input {
             nth,
             disable_derive_serde_ser,
             disable_derive_serde_de,
-            disable_derive_debug,
-            disable_derive_clone,
+            custom_derive,
             alias_name,
             field_opts,
         })

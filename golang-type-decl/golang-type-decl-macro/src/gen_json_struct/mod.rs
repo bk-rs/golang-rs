@@ -43,16 +43,17 @@ pub fn get_output(input: Input) -> TokenStream {
         }
     };
 
-    let mut field_names = struct_type
+    let field_names: Vec<_> = struct_type
         .field_decls
         .iter()
         .map(|field_decl| match &field_decl.struct_field {
             StructField::IdentifierListType(names, _) => names.to_owned(),
             StructField::EmbeddedField(embedded_field) => vec![embedded_field.name()],
         })
-        .flatten();
+        .flatten()
+        .collect();
     for field_name in input.field_opts.0.keys() {
-        if !field_names.any(|ref x| x == field_name) {
+        if !field_names.contains(field_name) {
             let err = format!("field [{}] not found", field_name);
             return quote!(compile_error!(#err));
         }
@@ -64,8 +65,7 @@ pub fn get_output(input: Input) -> TokenStream {
         opt: JsonStructOption {
             enable_derive_serde_ser: !input.disable_derive_serde_ser,
             enable_derive_serde_de: !input.disable_derive_serde_de,
-            enable_derive_debug: !input.disable_derive_debug,
-            enable_derive_clone: !input.disable_derive_clone,
+            custom_derive: input.custom_derive,
             alias_name: input.alias_name,
         },
         field_opts: input.field_opts.0,
