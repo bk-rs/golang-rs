@@ -12,6 +12,7 @@ mod input;
 
 pub use self::input::Input;
 
+#[allow(clippy::needless_collect)]
 pub fn get_output(input: Input) -> TokenStream {
     let type_decl = match input.code.parse::<TypeDecl>() {
         Ok(type_decl) => type_decl,
