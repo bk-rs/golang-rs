@@ -1,6 +1,6 @@
 [package]
 name = "golang-type-decl-core"
-version = "0.2.0"
+version = "0.3.0"
 authors = ["vkill <vkill.net@gmail.com>"]
 edition = "2018"
 description = "Golang Type Decl core"

@@ -1,6 +1,6 @@
 [package]
 name = "golang-type-decl"
-version = "0.2.0"
+version = "0.3.0"
 authors = ["vkill <vkill.net@gmail.com>"]
 edition = "2018"
 description = "Golang Type Decl"
@@ -13,8 +13,8 @@ categories = []
 readme = "README.md"
 
 [dependencies]
-golang-type-decl-core = { version = "=0.2.0", features = ["enable-quote-to_tokens"], path = "../golang-type-decl-core" }
-golang-type-decl-macro = { version = "=0.2.0", path = "../golang-type-decl-macro" }
+golang-type-decl-core = { version = "=0.3.0", features = ["enable-quote-to_tokens"], path = "../golang-type-decl-core" }
+golang-type-decl-macro = { version = "=0.3.0", path = "../golang-type-decl-macro" }
 
 [dev-dependencies]
 serde = { version = "1.0", features = ["derive"] }
