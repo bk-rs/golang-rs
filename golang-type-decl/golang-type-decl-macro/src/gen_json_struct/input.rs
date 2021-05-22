@@ -66,7 +66,7 @@ impl Parse for Input {
             } else if key == "custom_derive" {
                 let s = input.parse::<LitStr>()?.value();
                 if !s.is_empty() {
-                    custom_derive = s.split(",").map(|x| x.trim().to_owned()).collect()
+                    custom_derive = s.split(',').map(|x| x.trim().to_owned()).collect()
                 };
                 input.parse::<Token![,]>()?;
             } else if key == "alias_name" {
