@@ -43,17 +43,16 @@ pub fn get_output(input: Input) -> TokenStream {
         }
     };
 
-    let field_names: Vec<_> = struct_type
+    let mut field_names = struct_type
         .field_decls
         .iter()
         .map(|field_decl| match &field_decl.struct_field {
             StructField::IdentifierListType(names, _) => names.to_owned(),
             StructField::EmbeddedField(embedded_field) => vec![embedded_field.name()],
         })
-        .flatten()
-        .collect();
+        .flatten();
     for field_name in input.field_opts.0.keys() {
-        if !field_names.contains(field_name) {
+        if !field_names.any(|ref x| x == field_name) {
             let err = format!("field [{}] not found", field_name);
             return quote!(compile_error!(#err));
         }
